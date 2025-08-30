@@ -1,26 +1,44 @@
-@import "tailwindcss";
+/* globals.css */
 
+/* Apply box-sizing reset */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* Default dark theme (applied via :root) */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+    --color-bg: #1e1e2e;       /* matches your "base" color */
+    --color-fg: #f5f5f5;
+    --color-surface1: #9399b2; /* overlay2 */
+
+    --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Light theme overrides (activated via <html class="light">) */
+.light {
+    --color-bg: #ffffff;
+    --color-fg: #111111;
+    --color-surface1: #444444;
+
+    --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Improve text rendering */
+html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-family: var(--font-sans);
+    color-scheme: dark light;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+    background-color: var(--color-bg);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    min-height: 100vh;
+    line-height: 1.5;
 }
