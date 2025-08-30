@@ -31,15 +31,6 @@ const config: Config = {
                 foreground: "var(--color-fg)",
                 surface1: "var(--color-surface1)",
             },
-            spacing: {
-                xxxs: "0.25rem", // 4px
-                xxs: "0.5rem",   // 8px
-                xs: "0.75rem",   // 12px
-                sm: "1rem",      // 16px
-                md: "1.5rem",    // 24px
-                lg: "2rem",      // 32px
-                xxl: "4rem",
-            },
             fontSize: {
                 h1: ["2.5rem", { lineHeight: "0.9", fontWeight: "100" }],
                 h2: ["2rem", { lineHeight: "1.0", fontWeight: "700" }],

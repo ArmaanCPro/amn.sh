@@ -1,5 +1,17 @@
 @import "tailwindcss";
 
+/* Custom spacing utilities - define these BEFORE other styles */
+@theme {
+  --spacing-xxxs: 0.25rem;
+  --spacing-xxs: 0.5rem;
+  --spacing-xs: 0.75rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 3rem;
+  --spacing-xxl: 4rem;
+}
+
 /* Default dark theme (applied via :root) */
 :root {
     --color-bg: #1e1e2e;       /* base color */

@@ -13,7 +13,7 @@ export default async function BlogIndex() {
             <Ul className="w-full p-0 mt-xl border-b border-gray-600/25">
                 {publishedPosts.map((post) => (
                     <li key={post.path}
-                        className="m-0 pl-0 list-none flex flex-col gap-md py-xl border-t border-gray-600/25">
+                        className="m-0 pl-0 list-none flex flex-col gap-md py-md border-t border-gray-600/25">
                         <div className="flex gap-xl w-full">
                             <Link className="grow text-xl font-extrabold leading-tight no-underline uppercase text-current hover:text-blue-500" href={post.path}>
                                 {post.title
