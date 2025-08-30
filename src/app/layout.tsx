@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { ViewTransitions } from "next-view-transitions";
 import ThemeControl from "./ThemeControl";
+import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Armaan Chahal",
