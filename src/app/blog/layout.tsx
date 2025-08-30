@@ -15,8 +15,8 @@ export default function RootLayout({
 }>) {
     return (
         <>
-            <header className="content-center flex flex-col items-center justify-center mb-[var(-xl)] p-[var(-sm)]">
-                <Link href="/" className="flex items-center gap-[var(--sm)]">
+            <header className="content-center flex flex-col items-center justify-center mb-xl p-sm">
+                <Link href="/" className="flex items-center gap-sm">
                     <Logo className="w-[160]"/>
                 </Link>
                 <Nav/>

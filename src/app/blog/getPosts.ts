@@ -1,3 +1,4 @@
+
 import fs from "fs/promises";
 import path from "path";
 import { unstable_cache } from "next/cache";
@@ -17,41 +18,76 @@ export type PostMeta = {
 };
 
 export const getBlogPosts = unstable_cache(async () => {
-    const blogs = await fs.readdir(blogDir);
+    console.log("Blog directory:", blogDir);
 
-    // filter for folders
-    const blogsPathAndTitles = blogs.map(async (blog) => {
-        const blogPath = path.join(blogDir, blog);
-        const stat = await fs.stat(blogPath);
+    try {
+        const blogs = await fs.readdir(blogDir);
+        console.log("Found directories:", blogs);
 
-        if (!stat.isDirectory()) return null;
+        // filter for folders
+        const blogsPathAndTitles = blogs.map(async (blog) => {
+            const blogPath = path.join(blogDir, blog);
+            const stat = await fs.stat(blogPath);
 
-        const filesWithinFolder = await fs.readdir(blogPath);
-        if (!filesWithinFolder.includes("page.mdx")) return null;
+            if (!stat.isDirectory()) {
+                console.log(`${blog} is not a directory`);
+                return null;
+            }
 
-        const filePath = path.join(blogPath, "page.mdx");
-        const file = await fs.readFile(filePath, "utf-8");
+            const filesWithinFolder = await fs.readdir(blogPath);
+            console.log(`Files in ${blog}:`, filesWithinFolder);
 
-        const lines = file.split("\n");
-        const firstImport = lines.findIndex((line) => line.startsWith("import "));
+            if (!filesWithinFolder.includes("page.mdx")) {
+                console.log(`No page.mdx found in ${blog}`);
+                return null;
+            }
 
-        const relevantContent = lines.slice(0, firstImport).join("\n");
+            const filePath = path.join(blogPath, "page.mdx");
+            const file = await fs.readFile(filePath, "utf-8");
+            console.log(`Content of ${blog}/page.mdx:`, file.substring(0, 200) + "...");
 
-        const { metadata }: { metadata?: PostMeta } = (await evaluate(
-            relevantContent,
-            { ...runtime }
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        )) as any;
+            const lines = file.split("\n");
+            const firstImport = lines.findIndex((line) => line.startsWith("import "));
+            console.log(`First import line index in ${blog}:`, firstImport);
 
-        if (metadata == null) return null;
+            const relevantContent = lines.slice(0, firstImport).join("\n");
+            console.log(`Relevant content for ${blog}:`, relevantContent);
 
-        return { ...metadata, path: "/blog/" + blog };
-    });
-    const maybePostsResolved = await Promise.all(blogsPathAndTitles);
+            try {
+                const { metadata }: { metadata?: PostMeta } = (await evaluate(
+                    relevantContent,
+                    { ...runtime }
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                )) as any;
 
-    return maybePostsResolved
-        .filter((post) => post != null)
-        .sort((a, b) =>
-            a.date != null && b.date != null ? b.date.localeCompare(a.date) : 0
-        );
-});
+                console.log(`Metadata for ${blog}:`, metadata);
+
+                if (metadata == null) {
+                    console.log(`No metadata found for ${blog}`);
+                    return null;
+                }
+
+                return { ...metadata, path: "/blog/" + blog };
+            } catch (evalError) {
+                console.error(`Error evaluating ${blog}:`, evalError);
+                return null;
+            }
+        });
+
+        const maybePostsResolved = await Promise.all(blogsPathAndTitles);
+        console.log("Resolved posts:", maybePostsResolved);
+
+        const filteredPosts = maybePostsResolved
+            .filter((post) => post != null)
+            .sort((a, b) =>
+                a.date != null && b.date != null ? b.date.localeCompare(a.date) : 0
+            );
+
+        console.log("Final filtered posts:", filteredPosts);
+        return filteredPosts;
+
+    } catch (error) {
+        console.error("Error in getBlogPosts:", error);
+        return [];
+    }
+})

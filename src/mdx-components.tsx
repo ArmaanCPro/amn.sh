@@ -290,12 +290,12 @@ export function useMDXComponents(
 ): MDXComponents {
     return {
         ...components,
-        h1: (props) => <Heading level={1} {...props} />,
-        h2: (props) => <Heading level={2} {...props} />,
-        h3: (props) => <Heading level={3} {...props} />,
-        h4: (props) => <Heading level={4} {...props} />,
-        h5: (props) => <Heading level={5} {...props} />,
-        h6: (props) => <Heading level={6} {...props} />,
+        h1: (props) => React.createElement(Heading, { level: 1 as const, ...props }),
+        h2: (props) => React.createElement(Heading, { level: 2 as const, ...props }),
+        h3: (props) => React.createElement(Heading, { level: 3 as const, ...props }),
+        h4: (props) => React.createElement(Heading, { level: 4 as const, ...props }),
+        h5: (props) => React.createElement(Heading, { level: 5 as const, ...props }),
+        h6: (props) => React.createElement(Heading, { level: 6 as const, ...props }),
         p: P,
         pre: Pre,
         code: InlineCode,
