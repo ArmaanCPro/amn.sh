@@ -180,8 +180,8 @@ export function Pre({
                     }: React.HTMLAttributes<HTMLPreElement>) {
     const lang = className?.split("language-")[1] ?? "ts";
     return (
-        <div className="my-4 rounded bg-black/80 p-4 overflow-x-auto">
-            <Code lang={lang} {...props} />
+        <div className="my-md rounded bg-black/80 p-md overflow-x-auto border-0 outline-0 ring-0 shadow-none">
+            <Code lang={lang} theme="github-dark" {...props} />
         </div>
     );
 }
