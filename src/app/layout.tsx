@@ -4,6 +4,7 @@ import ThemeControl from "./ThemeControl";
 import "./globals.css";
 
 import {Analytics} from "@vercel/analytics/next"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 export const metadata: Metadata = {
     title: "Armaan Chahal",
@@ -47,6 +48,7 @@ export default function RootLayout({
             <ThemeControl>
                 {children}
                 <Analytics/>
+                <SpeedInsights/>
                 <footer className="text-muted font-sans mt-16 py-8 text-center">
                     All Rights Reserved.
                 </footer>
