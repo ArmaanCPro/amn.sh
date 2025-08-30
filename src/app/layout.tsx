@@ -18,7 +18,7 @@ export default function RootLayout({
 }>) {
     return (
         <ViewTransitions>
-            <html lang="en" className="box-border m-0 dark">
+            <html lang="en" className="box-border dark">
             <head>
                 <link rel="preconnect" href="https://fonts.googleapis.com"/>
                 <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin=""/>
@@ -43,18 +43,17 @@ export default function RootLayout({
                 <meta name="apple-mobile-web-app-title" content="MyWebSite"/>
                 <link rel="manifest" href="/site.webmanifest"/>
             </head>
-            <body className="antialiased bg-background text-foreground font-sans">
 
             <ThemeControl>
                 {children}
-                <Analytics/>
-                <SpeedInsights/>
                 <footer className="text-muted font-sans mt-16 py-8 text-center">
                     All Rights Reserved.
                 </footer>
             </ThemeControl>
 
-            </body>
+            <Analytics/>
+            <SpeedInsights/>
+
             </html>
         </ViewTransitions>
     );

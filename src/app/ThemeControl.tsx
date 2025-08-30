@@ -27,45 +27,77 @@ export default function ThemeControl({ children }: ThemeControlProps) {
     };
 
     return (
-        <div className="flex flex-col min-h-screen relative">
-            {/* Theme tabs */}
-            <div className="absolute top-0 right-0 flex p-4 gap-2">
+        <body>
+            <div className="fixed top-4 right-4 flex gap-1 z-50">
                 <button
-                    className={`appearance-none bg-transparent rounded border-none cursor-pointer h-8 w-8 p-2 text-current opacity-33 ${
-                        theme === "dark" ? "bg-blue-600/50 opacity-100" : ""
-                    }`}
+                    className={`
+                        w-8 h-8 p-1.5 rounded-lg cursor-pointer 
+                        transition-all duration-200 border-none
+                        text-gray-600 dark:text-gray-400
+                        hover:text-gray-800 dark:hover:text-gray-200
+                        ${theme === "dark" 
+                            ? "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100" 
+                            : "bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800"
+                        }
+                    `}
                     onClick={() => handleThemeChange("dark")}
+                    title="Dark mode"
                 >
                     <MoonIcon />
                 </button>
                 <button
-                    className={`appearance-none bg-transparent rounded border-none cursor-pointer h-8 w-8 p-2 text-current opacity-33 ${
-                        theme === "system" ? "bg-blue-600/50 opacity-100" : ""
-                    }`}
+                    className={`
+                        w-8 h-8 p-1.5 rounded-lg cursor-pointer 
+                        transition-all duration-200 border-none
+                        text-gray-600 dark:text-gray-400
+                        hover:text-gray-800 dark:hover:text-gray-200
+                        ${theme === "system" 
+                            ? "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100" 
+                            : "bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800"
+                        }
+                    `}
                     onClick={() => handleThemeChange("system")}
+                    title="System mode"
                 >
                     <SystemIcon />
                 </button>
                 <button
-                    className={`appearance-none bg-transparent rounded border-none cursor-pointer h-8 w-8 p-2 text-current opacity-33 ${
-                        theme === "light" ? "bg-blue-600/50 opacity-100" : ""
-                    }`}
+                    className={`
+                        w-8 h-8 p-1.5 rounded-lg cursor-pointer 
+                        transition-all duration-200 border-none
+                        text-gray-600 dark:text-gray-400
+                        hover:text-gray-800 dark:hover:text-gray-200
+                        ${theme === "light" 
+                            ? "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100" 
+                            : "bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800"
+                        }
+                    `}
                     onClick={() => handleThemeChange("light")}
+                    title="Light mode"
                 >
                     <SunIcon />
                 </button>
             </div>
 
-            {/* Content */}
-            <div className="flex-1">{children}</div>
-        </div>
+            {children}
+        </body>
     );
 }
 
-/* Icons remain mostly unchanged, just remove stylex props */
+/* Icons with proper dimensions */
 function SystemIcon() {
     return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg 
+            width="16" 
+            height="16" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            strokeWidth="2" 
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+            className="w-full h-full"
+        >
             <circle cx="12" cy="12" r="10" />
             <path d="M12 18a6 6 0 0 0 0-12v12z" />
         </svg>
@@ -74,7 +106,17 @@ function SystemIcon() {
 
 function SunIcon() {
     return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg 
+            width="16" 
+            height="16" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            strokeWidth="2" 
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+            className="w-full h-full"
+        >
             <circle cx="12" cy="12" r="4" />
             <path d="M12 2v2" />
             <path d="M12 20v2" />
@@ -90,7 +132,17 @@ function SunIcon() {
 
 function MoonIcon() {
     return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg 
+            width="16" 
+            height="16" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            strokeWidth="2" 
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+            className="w-full h-full"
+        >
             <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9" />
             <path d="M20 3v4" />
             <path d="M22 5h-4" />

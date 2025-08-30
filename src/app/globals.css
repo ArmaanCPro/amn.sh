@@ -1,16 +1,6 @@
-/* globals.css */
-
-@import "tailwindcss/preflight";
-@import "tailwindcss/utilities";
-
-/* Apply box-sizing reset */
-*,
-*::before,
-*::after {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* Default dark theme (applied via :root) */
 :root {

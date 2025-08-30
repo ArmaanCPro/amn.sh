@@ -10,19 +10,19 @@ export default async function BlogIndex() {
     return (
         <div>
             <H1 className="text-center text-balance">Posts</H1>
-            <Ul className="w-full p-0 mt-[var(--xxl)] border-b border-solid [border-bottom-color:color-mix(in_oklch,var(--fg),transparent_75%)] [@media(min-resolution:2dppx)]:border-b-[0.5px] [@media(min-resolution:3dppx)]:border-b-[0.33px]">
-                {publishedPosts.map((post, index) => (
-                    <li key={post.path || index}
-                        className="m-0 list-none flex flex-col gap-[var(--xxs)] py-[var(--md)] border-t border-solid [border-top-color:color-mix(in_oklch,var(--fg),transparent_75%)] [@media(min-resolution:2dppx)]:border-t-[0.5px] [@media(min-resolution:3dppx)]:border-t-[0.33px]">
-                        <div className="flex gap-[var(--md)] w-full">
-                            <Link className="grow text-[var(--h4)] font-extrabold leading-[0.9] no-underline uppercase text-[var(--fg)] hover:text-[var(--accent)]" href={post.path}>
+            <Ul className="w-full p-0 mt-xl border-b border-gray-600/25">
+                {publishedPosts.map((post) => (
+                    <li key={post.path}
+                        className="m-0 pl-0 list-none flex flex-col gap-md py-xl border-t border-gray-600/25">
+                        <div className="flex gap-xl w-full">
+                            <Link className="grow text-xl font-extrabold leading-tight no-underline uppercase text-current hover:text-blue-500" href={post.path}>
                                 {post.title
                                 ? wrapTitleWithViewTransitionNames(post.title, post.path)
                                 : ""}
                             </Link>
                             <span className="shrink-0 font-mono opacity-50">{post.date}</span>
                         </div>
-                        <P className="leading-[1.2] mt-0 opacity-50 w-full">{post.description}</P>
+                        <P className="leading-tight mt-0 opacity-50 w-full">{post.description}</P>
                     </li>
                 ))}
             </Ul>
