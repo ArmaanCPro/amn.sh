@@ -4,7 +4,7 @@ export const metadata = {
     author: "Armaan Chahal",
     published: true,
     tags: ["meta"],
-    description: "First post",
+    description: "First post detailing the creation of this blog site",
 };
 
 import path from "path";
@@ -13,8 +13,86 @@ export const __dirname = path.dirname(new URL(import.meta.url).pathname);
 # Hello World!
 
 I'm not a web developer, and this blog site itself is heavily inspired by others, and may be _slightly_ broken.
-But, I do hope that the content here will end up being useful to `someone`.
+But, I do hope that the content here will end up being useful to `someone`. By the way, this is open-source on Github.
 
+## The Process
+
+Wow, the process of getting this site up and running was insane. I have a _little_ experience with web dev; see my portfolio site I created long before this.
+But, the portfolio app was far simpler, and I bootstrapped it with V0, which essentially created all the code for it, and I made minimal changes. It's a single page app, so that's not surprising.
+This site was far more complicated. Well, not far more, but I had a few things I wanted to accomplish with this.
+- High performance
+- Very easy DX for creating new blog pages
+- Security
+
+### Performance
+
+The way to a C++ developer's heart is performance. One word is all it takes. Anyway, slow websites are painfully common in today's internet.
+Initially, I assumed --- like many others --- that poor performance was the result of heavy Javascript frameworks.
+But, this is built with Next.js, so clearly that isn't true. 
+
+It's true for essentially every medium out there that poor performance is the product of **poor development**.
+You know, people complain everywhere about poor performance. See complaints about UE5 (don't get me started on this), IDEs, etc.
+I ended up choosing Next because of its ease of development, ecosystem, and deployment (with Vercel). This also ends up fulfilling the
+security requirement, as Vercel pretty much handles stuff like botting itself (though other platforms like Netlify, Cloudfare Pages, etc do too).
+Next.js also has other convenient features like it's app router that greatly simplifies blog post routing.
+
+#### Security
+
+On the topic of security, it ended up being clear that security really isn't a problem. This site has no real way to be exploited (yes, that is a `challenge`),
+as there is no server-side code (at least when I created this post), no databases, etc. But, a lesson I learned from writing C++ code was that one of the best ways to avoid
+problematic and unsafe code is to write code that conforms to certain guidelines or best practices. For developing in React, it was clear that using Typescript and
+static analysis were going to be best practices, at least the most basic ones that I could use without spending a month learning JS/TS.
+
+### DX For Creating Blog Posts
+
+This is was the **hardest** part. I had a vision that I just wanted to be able to write Markdown files, and push those to Github, and Vercel would automatically redeploy and those
+files would be automatically added to the site.
+
+That was a naive mindset, but, that simplistic goal greatly helped developed a simple DX.
+
+I ended up choosing `mdx` for each blog page, as it is more flexible than Markdown and fits nicely with stuff like syntax highlighting.
+
+#### Syntax highlighting
+
+I wasted a good few hours on the topic of syntax highlighting. I first chose to use _Bright_, as it seemed like a simple enough tool to get started with highlighting.
+I already had remark installed and was using `@next/mdx` and `mdx-js`. They fit nicely with the remark/rehype ecosystem. I'm not actually using `remark` for parsing,
+I'm using mdx-js for that. Anyway, I searched around for some good syntax highlighters that worked nicely with rehype.
+
+I first landed on `shikijs` alongside `@shikijs/rehype`, which seemed perfect. This is the syntax highlighter that VS Code uses, and, though a little bit of a heavy package,
+seemed worthwile for my site. So, I ended up installing it and changing up all my code to work with it. It wasn't a lot of code chnge particularly, but there were a lot of 
+CSS styles I added. It didn't work. Why, you may ask? It's because Turbopack needs rehype plugins to be serializable at build time, which shikijs/rehype wasn't.
+
+So, after wasting an hour of work, I decided to try `rehype-prism-plus`, another popular rehype-based syntax highlighter. Same exact story. I actually checked with ChatGPT
+that rehype-prism-plus was serializable and worked with Turbopack, which it confirmed it did. Never trust LLMs.
+
+So, then I decided to try `rehype-pretty-code`, a syntax highlighter focused on nice-looking code. It is based on Shikijs, which meant it had Shiki's robustness.
+Also, it was explicitly made for Turbopack and Rehype, or at least, that's what ChatGPT said (lesson _not_ learned). Same story.
+Actually, rehype-pretty-code had a Github page that I found with an example using Nextjs and Turbopack, but I tried and couldn't get it to work.
+
+Then, I decided to try `sugar-high` by Vercel, made to be used with Remark. This actually wasn't a great fit, because, as far as I know, it is meant to be used at the MDX parsing stage rather than
+at the HTML stage (use with remark rather than rehype). Anyway, this didn't work either.
+
+So after multiple hours of work wasted, I settled on `Bright` which I was using in the first place. I would like to try to get some other syntax highlighter working in the future,
+something more powerful, but I do want to use Turbopack.
+
+## What I Learned
+
+Coming into this, I thought React would be pretty easy, as it is pretty easy to visualize with an Object-Oriented perspective with composition.
+**However**, that was far frome true. I struggled most with just understanding what the execution flow was, as it is far harder to trace code flow compared to a lower level language.
+
+
+Also, Javascript and even Typescript have so many akward decisions. I'm not quite sure how to explain it other than just that types don't feel like _types_.
+I'm very happy to return to C++ land after this.
+
+## Looking Forward
+
+I expect this website to have various topics, but mostly centered around what I am learning or doing, which is usually _not_ web dev, though I'd be open to more web dev in the future.
+I know this post isn't really an informative or useful post, but I did want to outline the process of building this website.
+
+
+
+
+Here's some C++
 ```c++
 #include <print>;
 int main()
