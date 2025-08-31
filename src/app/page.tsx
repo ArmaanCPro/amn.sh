@@ -17,6 +17,8 @@ export default function Home() {
                     </Link>
                     <Link
                         href="https://vportfolio-hazel.vercel.app/"
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="text-[crimson] dark:text-[cornflowerblue] uppercase no-underline hover:underline underline-offset-8 w-16 text-center"
                     >
                         Portfolio
