@@ -12,6 +12,46 @@
   --spacing-xxl: 4rem;
 }
 
+@theme {
+    --font-sans: ui-sans-serif, system-ui, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, monospace;
+
+    /* semantic font tokens */
+    --font-variable-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+
+    /* font sizes */
+    --text-h1: 5rem;
+    --text-h1--line-height: 0.9;
+    --text-h1--font-weight: 100;
+
+    --text-h2: 4rem;
+    --text-h2--line-height: 1.0;
+    --text-h2--font-weight: 700;
+
+    --text-h3: 3.75rem;
+    --text-h3--line-height: 1.2;
+    --text-h3--font-weight: 500;
+
+    --text-h4: 3.5rem;
+    --text-h4--line-height: 1.4;
+    --text-h4--font-weight: 600;
+
+    --text-h5: 3.25rem;
+    --text-h5--line-height: 1.5;
+    --text-h5--font-weight: 700;
+
+    --text-h6: 3rem;
+    --text-h6--line-height: 1.6;
+    --text-h6--font-weight: 800;
+
+    --text-p: 2.5rem;
+    --text-p--line-height: 1.4;
+    --text-p--font-weight: 400;
+
+    --text-sm: 2rem;
+    --text-sm--line-height: 1.4;
+}
+
 /* Default dark theme (applied via :root) */
 :root {
     --color-bg: #1e1e2e;       /* base color */
@@ -31,15 +71,50 @@
     --fg: #f5f5f5;
     --accent: #89b4fa; /* blue color */
     --h4: 1.5rem; /* font size for h4 */
+
+    @theme {
+    /* Theme colors - dark by default */
+    --color-rosewater: #8b4a3e;
+    --color-flamingo: #8b3e3e;
+    --color-pink: #8b3e6b;
+    --color-mauve: #6b3e8b;
+    --color-red: #8b3e3e;
+    --color-maroon: #8b3e4a;
+    --color-peach: #8b5e3e;
+    --color-yellow: #8b7e3e;
+    --color-green: #3e8b4a;
+    --color-teal: #3e8b7e;
+    --color-sky: #3e6b8b;
+    --color-sapphire: #3e5e8b;
+    --color-blue: #3e4a8b;
+    --color-lavender: #4a3e8b;
+    }
 }
 
 /* Light theme overrides (activated via <html class="light">) */
 .light {
     --color-bg: #ffffff;
     --color-fg: #111111;
-    --color-surface1: #444444;
     --fg: #111111;
     --accent: #1e40af; /* darker blue for light theme */
+
+    @theme {
+        /* Theme colors - light mode */
+        --color-rosewater: #f2d5cf;
+        --color-flamingo: #eebebe;
+        --color-pink: #f4b8e4;
+        --color-mauve: #ca9ee6;
+        --color-red: #e78284;
+        --color-maroon: #ea999c;
+        --color-peach: #ef9f76;
+        --color-yellow: #e5c890;
+        --color-green: #a6d189;
+        --color-teal: #81c8be;
+        --color-sky: #99d1db;
+        --color-sapphire: #85c1dc;
+        --color-blue: #8caaee;
+        --color-lavender: #babbf1;
+    }
 }
 
 /* Improve text rendering */

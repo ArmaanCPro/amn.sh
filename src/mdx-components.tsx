@@ -46,12 +46,12 @@ export function Heading({
 
     // Base heading styles for different levels
     const headingStyles = {
-        1: "text-5xl font-bold mt-8 mb-4",      // was text-4xl
-        2: "text-4xl font-bold mt-6 mb-3",      // was text-3xl
-        3: "text-3xl font-semibold mt-5 mb-3",  // was text-2xl
-        4: "text-2xl font-semibold mt-4 mb-2",  // was text-xl
-        5: "text-xl font-medium mt-4 mb-2",     // was text-lg
-        6: "text-lg font-medium mt-3 mb-2"      // was text-base
+        1: "text-5xl font-bold mt-8 mb-4 text-rosewater",
+        2: "text-4xl font-bold mt-6 mb-3 text-flamingo",
+        3: "text-3xl font-semibold mt-5 mb-3 text-pink",
+        4: "text-2xl font-semibold mt-4 mb-2 text-mauve",
+        5: "text-xl font-medium mt-4 mb-2 text-blue",
+        6: "text-lg font-medium mt-3 mb-2 text-lavender"
     };
 
     return React.createElement('a',
@@ -75,21 +75,21 @@ export function Heading({
 
 export function H1({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
     return React.createElement('h1', {
-        className: `text-5xl font-bold mt-8 mb-4 ${className || ''}`,  // was text-4xl
+        className: `text-5xl font-bold mt-8 mb-4 ${className || ''}`,
         ...props
     });
 }
 
 export function H2({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
     return React.createElement('h2', {
-        className: `text-4xl font-bold mt-6 mb-3 ${className || ''}`,  // was text-3xl
+        className: `text-4xl font-bold mt-6 mb-3 ${className || ''}`,
         ...props
     });
 }
 
 export function H3({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
     return React.createElement('h3', {
-        className: `text-3xl font-semibold mt-5 mb-3 ${className || ''}`,  // was text-2xl
+        className: `text-3xl font-semibold mt-5 mb-3 ${className || ''}`,
         ...props
     });
 }
