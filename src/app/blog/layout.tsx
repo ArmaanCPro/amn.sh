@@ -14,16 +14,16 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <div className="min-h-screen px-4 sm:px-6 lg:px-8">
-            <header className="content-center flex flex-col items-center justify-center mb-xl p-sm max-w-4xl mx-auto">
+        <>
+            <header className="content-center flex flex-col items-center justify-center mb-xl p-sm">
                 <Link href="/" className="flex items-center gap-sm">
                     <Logo className="w-[160]"/>
                 </Link>
                 <Nav/>
             </header>
-            <main className="content-center flex flex-col items-center justify-center max-w-4xl mx-auto">
+            <main className="content-center flex flex-col items-center justify-center">
                 {children}
             </main>
-        </div>
+        </>
     )
 }
