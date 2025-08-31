@@ -48,6 +48,7 @@ html {
     -moz-osx-font-smoothing: grayscale;
     font-family: var(--font-sans);
     color-scheme: dark light;
+    font-size: 18px;
 }
 
 body {
