@@ -2,14 +2,14 @@
 
 /* Custom spacing utilities - define these BEFORE other styles */
 @theme {
-  --spacing-xxxs: 0.25rem;
-  --spacing-xxs: 0.5rem;
-  --spacing-xs: 0.75rem;
-  --spacing-sm: 1rem;
-  --spacing-md: 1.5rem;
-  --spacing-lg: 2rem;
-  --spacing-xl: 3rem;
-  --spacing-xxl: 4rem;
+    --spacing-xxxs: 0.25rem;
+    --spacing-xxs: 0.5rem;
+    --spacing-xs: 0.75rem;
+    --spacing-sm: 1rem;
+    --spacing-md: 1.5rem;
+    --spacing-lg: 2rem;
+    --spacing-xl: 3rem;
+    --spacing-xxl: 4rem;
 }
 
 @theme {
@@ -19,37 +19,37 @@
     /* semantic font tokens */
     --font-variable-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
 
-    /* font sizes */
-    --text-h1: 5rem;
-    --text-h1--line-height: 0.9;
+    /* fluid font sizes */
+    --text-h1: clamp(2rem, 6vw, 5rem);
+    --text-h1--line-height: 1.1;
     --text-h1--font-weight: 100;
 
-    --text-h2: 4rem;
-    --text-h2--line-height: 1.0;
+    --text-h2: clamp(1.75rem, 5vw, 4rem);
+    --text-h2--line-height: 1.2;
     --text-h2--font-weight: 700;
 
-    --text-h3: 3.75rem;
-    --text-h3--line-height: 1.2;
+    --text-h3: clamp(1.5rem, 4.5vw, 3.75rem);
+    --text-h3--line-height: 1.25;
     --text-h3--font-weight: 500;
 
-    --text-h4: 3.5rem;
-    --text-h4--line-height: 1.4;
+    --text-h4: clamp(1.25rem, 4vw, 3.5rem);
+    --text-h4--line-height: 1.35;
     --text-h4--font-weight: 600;
 
-    --text-h5: 3.25rem;
-    --text-h5--line-height: 1.5;
+    --text-h5: clamp(1.125rem, 3.5vw, 3.25rem);
+    --text-h5--line-height: 1.4;
     --text-h5--font-weight: 700;
 
-    --text-h6: 3rem;
-    --text-h6--line-height: 1.6;
+    --text-h6: clamp(1rem, 3vw, 3rem);
+    --text-h6--line-height: 1.45;
     --text-h6--font-weight: 800;
 
-    --text-p: 1.25rem;
-    --text-p--line-height: 1.4;
+    --text-p: clamp(1rem, 2.5vw, 1.25rem);
+    --text-p--line-height: 1.6;
     --text-p--font-weight: 400;
 
-    --text-sm: 2rem;
-    --text-sm--line-height: 1.4;
+    --text-sm: clamp(0.875rem, 2vw, 1rem);
+    --text-sm--line-height: 1.5;
 }
 
 /* Default dark theme (applied via :root) */
@@ -59,7 +59,7 @@
     --color-surface1: #9399b2; /* overlay2 */
 
     --font-sans: "Baskerville", ui-sans-serif, system-ui, sans-serif;
-    
+
     --xxs: 0.5rem;
     --xs: 0.75rem;
     --sm: 1rem;
@@ -67,27 +67,27 @@
     --lg: 2rem;
     --xl: 3rem;
     --xxl: 4rem;
-    
+
     --fg: #f5f5f5;
     --accent: #89b4fa; /* blue color */
-    --h4: 1.5rem; /* font size for h4 */
+    --h4: 1.5rem; /* fallback font size for h4 */
 
     @theme {
-    /* Theme colors - dark by default */
-    --color-rosewater: #8b4a3e;
-    --color-flamingo: #8b3e3e;
-    --color-pink: #8b3e6b;
-    --color-mauve: #6b3e8b;
-    --color-red: #8b3e3e;
-    --color-maroon: #8b3e4a;
-    --color-peach: #8b5e3e;
-    --color-yellow: #8b7e3e;
-    --color-green: #3e8b4a;
-    --color-teal: #3e8b7e;
-    --color-sky: #3e6b8b;
-    --color-sapphire: #3e5e8b;
-    --color-blue: #3e4a8b;
-    --color-lavender: #4a3e8b;
+        /* Theme colors - dark by default */
+        --color-rosewater: #8b4a3e;
+        --color-flamingo: #8b3e3e;
+        --color-pink: #8b3e6b;
+        --color-mauve: #6b3e8b;
+        --color-red: #8b3e3e;
+        --color-maroon: #8b3e4a;
+        --color-peach: #8b5e3e;
+        --color-yellow: #8b7e3e;
+        --color-green: #3e8b4a;
+        --color-teal: #3e8b7e;
+        --color-sky: #3e6b8b;
+        --color-sapphire: #3e5e8b;
+        --color-blue: #3e4a8b;
+        --color-lavender: #4a3e8b;
     }
 }
 
