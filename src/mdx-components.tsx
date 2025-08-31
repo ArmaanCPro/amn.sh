@@ -75,42 +75,42 @@ export function Heading({
 
 export function H1({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
     return React.createElement('h1', {
-        className: `text-5xl font-bold mt-8 mb-4 ${className || ''}`,  // was text-4xl
+        className: `text-3xl sm:text-4xl lg:text-5xl font-bold mt-8 mb-4 break-words ${className || ''}`,
         ...props
     });
 }
 
 export function H2({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
     return React.createElement('h2', {
-        className: `text-4xl font-bold mt-6 mb-3 ${className || ''}`,  // was text-3xl
+        className: `text-2xl sm:text-3xl lg:text-4xl font-bold mt-6 mb-3 break-words ${className || ''}`,
         ...props
     });
 }
 
 export function H3({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
     return React.createElement('h3', {
-        className: `text-3xl font-semibold mt-5 mb-3 ${className || ''}`,  // was text-2xl
+        className: `text-xl sm:text-2xl lg:text-3xl font-semibold mt-5 mb-3 break-words ${className || ''}`,
         ...props
     });
 }
 
 export function H4({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
     return React.createElement('h4', {
-        className: `text-2xl font-semibold mt-4 mb-2 ${className || ''}`,  // was text-xl
+        className: `text-lg sm:text-xl lg:text-2xl font-semibold mt-4 mb-2 break-words ${className || ''}`,
         ...props
     });
 }
 
 export function H5({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
     return React.createElement('h5', {
-        className: `text-xl font-medium mt-4 mb-2 ${className || ''}`,  // was text-lg
+        className: `text-base sm:text-lg lg:text-xl font-medium mt-4 mb-2 break-words ${className || ''}`,
         ...props
     });
 }
 
 export function H6({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
     return React.createElement('h6', {
-        className: `text-lg font-medium mt-3 mb-2 ${className || ''}`,  // was text-base
+        className: `text-base sm:text-base lg:text-lg font-medium mt-3 mb-2 break-words ${className || ''}`,
         ...props
     });
 }
@@ -118,7 +118,7 @@ export function H6({ className, ...props }: React.HTMLAttributes<HTMLHeadingElem
 function H1_Inner({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
     return React.createElement(Heading, {
         level: 1 as const,
-        className: `text-5xl font-bold mt-8 mb-4 ${className || ''}`,  // was text-4xl
+        className: `text-3xl sm:text-4xl lg:text-5xl font-bold mt-8 mb-4 break-words ${className || ''}`,
         ...props
     });
 }
@@ -126,7 +126,7 @@ function H1_Inner({ className, ...props }: React.HTMLAttributes<HTMLHeadingEleme
 function H2_Inner({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
     return React.createElement(Heading, {
         level: 2 as const,
-        className: `text-4xl font-bold mt-6 mb-3 ${className || ''}`,  // was text-3xl
+        className: `text-2xl sm:text-3xl lg:text-4xl font-bold mt-6 mb-3 break-words ${className || ''}`,
         ...props
     });
 }
@@ -134,7 +134,7 @@ function H2_Inner({ className, ...props }: React.HTMLAttributes<HTMLHeadingEleme
 function H3_Inner({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
     return React.createElement(Heading, {
         level: 3 as const,
-        className: `text-3xl font-semibold mt-5 mb-3 ${className || ''}`,  // was text-2xl
+        className: `text-xl sm:text-2xl lg:text-3xl font-semibold mt-5 mb-3 break-words ${className || ''}`,
         ...props
     });
 }
@@ -142,7 +142,7 @@ function H3_Inner({ className, ...props }: React.HTMLAttributes<HTMLHeadingEleme
 function H4_Inner({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
     return React.createElement(Heading, {
         level: 4 as const,
-        className: `text-2xl font-semibold mt-4 mb-2 ${className || ''}`,  // was text-xl
+        className: `text-lg sm:text-xl lg:text-2xl font-semibold mt-4 mb-2 break-words ${className || ''}`,
         ...props
     });
 }
@@ -150,7 +150,7 @@ function H4_Inner({ className, ...props }: React.HTMLAttributes<HTMLHeadingEleme
 function H5_Inner({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
     return React.createElement(Heading, {
         level: 5 as const,
-        className: `text-xl font-medium mt-4 mb-2 ${className || ''}`,  // was text-lg
+        className: `text-base sm:text-lg lg:text-xl font-medium mt-4 mb-2 break-words ${className || ''}`,
         ...props
     });
 }
@@ -158,7 +158,7 @@ function H5_Inner({ className, ...props }: React.HTMLAttributes<HTMLHeadingEleme
 function H6_Inner({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
     return React.createElement(Heading, {
         level: 6 as const,
-        className: `text-lg font-medium mt-3 mb-2 ${className || ''}`,  // was text-base
+        className: `text-base sm:text-base lg:text-lg font-medium mt-3 mb-2 break-words ${className || ''}`,
         ...props
     });
 }
@@ -168,7 +168,7 @@ export function P({
                       ...props
                   }: React.HTMLAttributes<HTMLParagraphElement>) {
     return (
-        <p className="text-lg leading-relaxed mt-4 max-w-4xl" {...props}>  {/* was text-base */}
+        <p className="text-base sm:text-lg leading-relaxed mt-4 max-w-none break-words" {...props}>
             {transformChildren(children)}
         </p>
     );
@@ -193,11 +193,11 @@ export function Pre({
 }
 
 export function Ul(props: React.HTMLAttributes<HTMLUListElement>) {
-    return <ul className="list-disc ml-6 mt-4 space-y-2 max-w-4xl" {...props} />;
+    return <ul className="list-disc ml-6 mt-4 space-y-2 max-w-none break-words" {...props} />;
 }
 
 export function Ol(props: React.HTMLAttributes<HTMLOListElement>) {
-    return <ol className="list-decimal ml-6 mt-4 space-y-2 max-w-4xl" {...props} />;
+    return <ol className="list-decimal ml-6 mt-4 space-y-2 max-w-none break-words" {...props} />;
 }
 
 export function Li({
@@ -214,10 +214,10 @@ export function Li({
 export function Blockquote(props: React.HTMLAttributes<HTMLElement>) {
     return (
         <blockquote
-            className="relative my-4 rounded border-l-2 border-orange-300 bg-gray-900/50 p-4 text-gray-300 max-w-4xl"
+            className="relative my-4 rounded border-l-2 border-orange-300 bg-gray-900/50 p-4 text-gray-300 max-w-none break-words"
             {...props}
         >
-            <span className="absolute left-2 top-0 text-6xl opacity-25 -z-10">“</span>
+            <span className="absolute left-2 top-0 text-6xl opacity-25 -z-10">"</span>
             {props.children}
         </blockquote>
     );

@@ -8,21 +8,21 @@ export default async function BlogIndex() {
     const publishedPosts = posts.filter((post) => post.published);
 
     return (
-        <div>
+        <div className="w-full max-w-4xl mx-auto px-4 sm:px-0">
             <H1 className="text-center text-balance">Posts</H1>
             <Ul className="w-full p-0 mt-xl border-b border-gray-600/25">
                 {publishedPosts.map((post) => (
                     <li key={post.path}
                         className="m-0 pl-0 list-none flex flex-col gap-md py-md border-t border-gray-600/25">
-                        <div className="flex gap-xl w-full">
-                            <Link className="grow text-xl font-extrabold leading-tight no-underline uppercase text-current hover:text-blue-500" href={post.path}>
+                        <div className="flex flex-col sm:flex-row gap-2 sm:gap-xl w-full">
+                            <Link className="flex-1 text-lg sm:text-xl font-extrabold leading-tight no-underline uppercase text-current hover:text-blue-500 break-words" href={post.path}>
                                 {post.title
                                 ? wrapTitleWithViewTransitionNames(post.title, post.path)
                                 : ""}
                             </Link>
-                            <span className="shrink-0 font-mono opacity-50">{post.date}</span>
+                            <span className="shrink-0 font-mono opacity-50 text-sm sm:text-base">{post.date}</span>
                         </div>
-                        <P className="leading-tight mt-0 opacity-50 w-full">{post.description}</P>
+                        <P className="leading-tight mt-0 opacity-50 w-full text-base sm:text-lg">{post.description}</P>
                     </li>
                 ))}
             </Ul>
