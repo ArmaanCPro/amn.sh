@@ -3,7 +3,7 @@ import { Link } from "next-view-transitions";
 
 export function Nav() {
     return (
-        <nav className="absolute top-2 left-0 flex gap-6 p-4 w-auto">
+        <nav className="absolute top-2 left-0 flex flex-wrap justify-center gap-4 text-sm sm:text-base p-4 w-auto">
             <Link
                 href="/blog"
                 className="text-[crimson] dark:text-[cornflowerblue] uppercase no-underline hover:underline underline-offset-8"

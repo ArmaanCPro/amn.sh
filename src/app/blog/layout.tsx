@@ -15,13 +15,13 @@ export default function RootLayout({
 }>) {
     return (
         <>
-            <header className="content-center flex flex-col items-center justify-center mb-xl p-sm">
-                <Link href="/" className="flex items-center gap-sm">
-                    <Logo className="w-[160]"/>
+            <header className="w-full max-w-screen px-4 sm:px-6 py-3 flex flex-col items-center gap-2 mb-6">
+                <Link href="/" className="flex items-center justify-center">
+                    <Logo className="w-[120px] sm:w-[160px] h-auto" />
                 </Link>
                 <Nav/>
             </header>
-            <main className="content-center flex flex-col items-center justify-center">
+            <main className="content-center flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
                 {children}
             </main>
         </>
