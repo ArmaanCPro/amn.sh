@@ -1,9 +1,6 @@
 @import "tailwindcss";
 @import "./shadcn.css";
 
-@import "tw-animate-css";
-@plugin "tailwindcss-animate";
-
 /* Custom spacing utilities */
 @theme {
     --spacing-xxxs: 0.25rem;
