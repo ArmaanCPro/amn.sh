@@ -227,7 +227,7 @@ export function Li({
                        ...props
                    }: React.HTMLAttributes<HTMLLIElement>) {
     return (
-        <li className="pl-1 marker:text-rose-700" {...props}>
+        <li className="pl-1 marker:text-rose-400 text-p" {...props}>
             {transformChildren(children)}
         </li>
     );
