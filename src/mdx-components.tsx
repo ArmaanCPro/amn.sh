@@ -188,8 +188,8 @@ export function Pre({
             if (typeof child === 'string') {
                 return child;
             }
-            if (React.isValidElement(child) && typeof (child.props as any).children === 'string') {
-                return (child.props as any).children;
+            if (React.isValidElement(child) && typeof (child.props as { children: unknown }).children === 'string') {
+                return (child.props as { children: string }).children;
             }
             return '';
         })
