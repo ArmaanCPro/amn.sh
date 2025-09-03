@@ -3,6 +3,7 @@ import NextImage from "next/image";
 import { Code } from "bright";
 import React, { JSX } from "react";
 import { Link } from "next-view-transitions";
+import {CopyButton} from "@/app/components/ui/shadcn-io/copy-button";
 
 // helper to replace quotes with smart quotes
 function transformChildren(children: React.ReactNode): React.ReactNode {
@@ -176,17 +177,38 @@ export function P({
 
 export function Pre({
                         className,
+                        children,
                         ...props
                     }: React.HTMLAttributes<HTMLPreElement>) {
-    const lang = className?.split("language-")[1] ?? "ts";
+    const lang = className?.split("language-")[1] ?? "cpp";
+
+    // Extract the raw text content from children
+    const codeContent = React.Children.toArray(children)
+        .map(child => {
+            if (typeof child === 'string') {
+                return child;
+            }
+            if (React.isValidElement(child) && typeof (child.props as { children: unknown }).children === 'string') {
+                return (child.props as { children: string }).children;
+            }
+            return '';
+        })
+        .join('')
+        .trimEnd();
+
     return (
         <div className="my-md rounded p-md overflow-x-auto text-lg">
-            <div>
+            <div className="relative overflow-x-auto">
                 <Code
                     lang={lang}
                     theme="github-dark"
-                    {...props}
-                />
+                    lineNumbers={true}
+                    className="text-sm"
+                >
+                    {codeContent}
+                </Code>
+
+                <CopyButton content={codeContent} className="absolute top-2 right-2" variant={"secondary"} />
             </div>
         </div>
     );
