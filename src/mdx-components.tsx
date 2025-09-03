@@ -208,7 +208,7 @@ export function Pre({
                     {codeContent}
                 </Code>
 
-                <CopyButton content={codeContent} className="absolute top-2 right-2" />
+                <CopyButton content={codeContent} className="absolute top-2 right-2" variant={"secondary"} />
             </div>
         </div>
     );

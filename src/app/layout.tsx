@@ -1,10 +1,11 @@
 import type {Metadata} from 'next';
 import {ViewTransitions} from "next-view-transitions";
-import ThemeControl from "./ThemeControl";
 import "./globals.css";
 
 import {Analytics} from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import {ThemeProvider} from "@/app/components/ThemeProvider";
+import {ThemeModeToggle} from "@/app/components/ThemeModeToggle";
 
 export const metadata: Metadata = {
     title: "Armaan Chahal",
@@ -18,7 +19,7 @@ export default function RootLayout({
 }>) {
     return (
         <ViewTransitions>
-            <html lang="en" className="box-border dark">
+            <html lang="en" className="box-border" suppressHydrationWarning={true}>
             <head>
                 <link rel="preconnect" href="https://fonts.googleapis.com"/>
                 <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin=""/>
@@ -44,15 +45,25 @@ export default function RootLayout({
                 <link rel="manifest" href="/site.webmanifest"/>
             </head>
 
-            <ThemeControl>
-                {children}
-                <footer className="text-muted font-sans mt-16 py-8 text-center">
-                    All Rights Reserved.
-                </footer>
-            </ThemeControl>
+            <body>
+                <ThemeProvider
+                    attribute="class"
+                    defaultTheme="system"
+                    enableSystem
+                    disableTransitionOnChange
+                >
+                    <div className="fixed top-4 right-4 flex gap-1 z-50">
+                        <ThemeModeToggle />
+                    </div>
+                    {children}
+                    <footer className="text-muted font-sans mt-16 py-8 text-center">
+                        All Rights Reserved.
+                    </footer>
+                </ThemeProvider>
 
-            <Analytics/>
-            <SpeedInsights/>
+                <Analytics/>
+                <SpeedInsights/>
+            </body>
 
             </html>
         </ViewTransitions>
