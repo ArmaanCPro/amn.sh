@@ -122,6 +122,8 @@ html {
     font-family: var(--font-sans);
     color-scheme: dark light;
     font-size: 18px;
+
+    scroll-behavior: smooth;
 }
 
 body {
