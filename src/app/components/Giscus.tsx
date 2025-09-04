@@ -13,21 +13,23 @@ interface GiscusProps {
     reactionsEnabled?: '0' | '1'
     emitMetadata?: '0' | '1'
     inputPosition?: 'top' | 'bottom'
-    lang?: string
+    lang?: string,
+    className?: string,
 }
 
 export function Giscus({
-    repo,
-    repoId,
-    category,
-    categoryId,
-    mapping,
+    repo = 'armaancpro/amn.sh',
+    repoId = 'R_kgDOPk4HzQ',
+    category = 'General',
+    categoryId = 'DIC_kwDOPk4Hzc4Cu758',
+    mapping = 'pathname',
     theme = 'preferred_color_scheme',
     strict = '0',
     reactionsEnabled = '1',
     emitMetadata = '0',
     inputPosition = 'top',
-    lang = 'en'
+    lang = 'en',
+    className,
 }: GiscusProps) {
     const containerRef = useRef<HTMLDivElement>(null)
 
@@ -61,5 +63,5 @@ export function Giscus({
         }
     }, [repo, repoId, category, categoryId, mapping, theme, strict, reactionsEnabled, emitMetadata, inputPosition, lang])
 
-    return <div ref={containerRef} />
+    return <div className={className} ref={containerRef} />
 }

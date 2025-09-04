@@ -197,8 +197,8 @@ export function Pre({
         .trimEnd();
 
     return (
-        <div className="my-md rounded p-md overflow-x-auto text-lg">
-            <div className="relative overflow-x-auto">
+        <div className="my-md rounded p-md overflow-hidden max-w-[90rem] text-lg">
+            <div className="relative overflow-hidden max-w-[90rem]">
                 <Code
                     lang={lang}
                     theme="github-dark"
