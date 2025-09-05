@@ -35,7 +35,6 @@ export const getBlogPosts = unstable_cache(async () => {
             }
 
             const filesWithinFolder = await fs.readdir(blogPath);
-            console.log(`Files in ${blog}:`, filesWithinFolder);
 
             if (!filesWithinFolder.includes("page.mdx")) {
                 console.log(`No page.mdx found in ${blog}`);
@@ -44,14 +43,11 @@ export const getBlogPosts = unstable_cache(async () => {
 
             const filePath = path.join(blogPath, "page.mdx");
             const file = await fs.readFile(filePath, "utf-8");
-            console.log(`Content of ${blog}/page.mdx:`, file.substring(0, 200) + "...");
 
             const lines = file.split("\n");
             const firstImport = lines.findIndex((line) => line.startsWith("import "));
-            console.log(`First import line index in ${blog}:`, firstImport);
 
             const relevantContent = lines.slice(0, firstImport).join("\n");
-            console.log(`Relevant content for ${blog}:`, relevantContent);
 
             const bodyContent = lines.slice(firstImport).join("\n");
 
@@ -61,8 +57,6 @@ export const getBlogPosts = unstable_cache(async () => {
                     { ...runtime }
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 )) as any;
-
-                console.log(`Metadata for ${blog}:`, metadata);
 
                 if (metadata == null) {
                     console.log(`No metadata found for ${blog}`);
@@ -81,7 +75,6 @@ export const getBlogPosts = unstable_cache(async () => {
         });
 
         const maybePostsResolved = await Promise.all(blogsPathAndTitles);
-        console.log("Resolved posts:", maybePostsResolved);
 
         const filteredPosts = maybePostsResolved
             .filter((post) => post != null)
@@ -89,7 +82,6 @@ export const getBlogPosts = unstable_cache(async () => {
                 a.date != null && b.date != null ? b.date.localeCompare(a.date) : 0
             );
 
-        console.log("Final filtered posts:", filteredPosts);
         return filteredPosts;
 
     } catch (error) {
