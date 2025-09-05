@@ -254,7 +254,7 @@ export function A({
             <Link href={href} className="text-blue-500 underline" {...props} />
         );
     }
-    return <a href={href} className="text-blue-500 underline" {...props} />;
+    return <a href={href} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline" {...props} />;
 }
 
 export function Strong(props: React.HTMLAttributes<HTMLElement>) {
