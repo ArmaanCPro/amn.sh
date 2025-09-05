@@ -19,6 +19,7 @@ Object-Oriented Programming follows the `model of the world` approach. You think
 and then you translate it into code. Take an example anyone can understand:
     - You have a white chair
     - You have a pink chair that is wider than the white one
+
 Clearly, both of these things have something in common. They are both chairs!
 This shared property is usually modeled with an abstract base class called `Chair` with properties such as `width` and `color`.
 These properties can be overridden by the derived classes, such as `PinkChair` and `WhiteChair`.
@@ -86,10 +87,12 @@ Check out [this talk](https://youtu.be/i5MAXAxp_Tw?si=e-fTGH6gZjEhxTi) for detai
 
 Abstraction is often times a point people new to DOD or traditional OOP programmers are confused with.
 Are you even supposed to abstract? How do you abstract? Ultimately, the question should be:
+
 > "What is the philosophy of abstraction?"
 
 The answer, as it always is with abstraction, is unclear. DOD purists will say that you should never abstract away the data,
 and that the client should always be aware of the data transformations. This results in very traditional, C89-style code. Consider this:
+
 ```c++
 int* data = new int[100000];
 
@@ -97,19 +100,24 @@ for (int i = 0; i < 10000; i++) {
     data[i] = (i + 1) * -3;
 }
 ```
+
 Can you spot any problems?
+
 They are as follows:
+
 - The pointer to data is never deleted
 - The range doesn't go through all the data (100000 vs 10000), though that _could_ be intended
 
 This may not seem like a big deal, but the problem scales as the code scales.
 
 There are four (five) horsemen of the apocalypse in low-level programming:
+
 - Bounds Safety
 - Type Safety
 - Lifetime Safety
 - Initialization Safety
 - (Undefined Behavior, _sometimes_)
+
 
 The above example really doesn't account for any of these. At the very least, it doesn't use malloc, but you should never use `new` in C++, so initialization safety has a big X.
 Obviously, bounds safety is not accounted for, we could copy-paste any bounds into the for loop. Lifetime safety is unaccounted for, we could forget to delete the pointer.
@@ -117,6 +125,7 @@ Type safety may not seem like a problem here, but it could become one. What if y
 Sure, you may see that in this example, but what if you are getting data from a function that lives in a different file, where a different team works on it?
 
 So, a better example is this:
+
 ```c++
 std::vector<int> data(100000);
 
@@ -150,7 +159,6 @@ know that you are using a cache line and don't waste the _limited_ data (If you'
 This is why SOA is so good, because it is _optimal_ for the cache line. If you only need the `colors` of a `Chair`, you don't need to waste the cache line with the `widths`.
 Keep in mind that accessing memory is **orders of magnitude** slower than doing something like division or square root.
 Optimize for the hardware, as Mike Acton would say in his [great talk on DOD](https://www.youtube.com/watch?v=rX0ItVEVjHc).
-
 
 
 Going back to the **harmony**, OOP is not mutually exclusive with DOD.
