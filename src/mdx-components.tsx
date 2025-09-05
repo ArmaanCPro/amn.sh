@@ -169,7 +169,7 @@ export function P({
                       ...props
                   }: React.HTMLAttributes<HTMLParagraphElement>) {
     return (
-        <p className="text-p leading-relaxed mt-4 max-w-4xl" {...props}>  {/* was text-base */}
+        <p className="text-p leading-relaxed mt-4 max-w-full" {...props}>  {/* was text-base */}
             {transformChildren(children)}
         </p>
     );
@@ -197,8 +197,8 @@ export function Pre({
         .trimEnd();
 
     return (
-        <div className="my-md rounded p-md overflow-hidden max-w-[90rem] text-lg">
-            <div className="relative overflow-hidden max-w-[90rem]">
+        <div className="my-md rounded p-md w-full overflow-hidden max-w-full text-lg">
+            <div className="relative w-full overflow-x-auto max-w-full">
                 <Code
                     lang={lang}
                     theme="github-dark"
@@ -215,11 +215,11 @@ export function Pre({
 }
 
 export function Ul(props: React.HTMLAttributes<HTMLUListElement>) {
-    return <ul className="list-disc ml-6 mt-4 space-y-2 max-w-4xl" {...props} />;
+    return <ul className="list-disc ml-6 mt-4 space-y-2 max-w-full" {...props} />;
 }
 
 export function Ol(props: React.HTMLAttributes<HTMLOListElement>) {
-    return <ol className="list-decimal ml-6 mt-4 space-y-2 max-w-4xl" {...props} />;
+    return <ol className="list-decimal ml-6 mt-4 space-y-2 max-w-full" {...props} />;
 }
 
 export function Li({
@@ -236,7 +236,7 @@ export function Li({
 export function Blockquote(props: React.HTMLAttributes<HTMLElement>) {
     return (
         <blockquote
-            className="relative my-4 rounded border-l-2 border-orange-300 bg-gray-900/50 p-4 text-gray-300 max-w-4xl"
+            className="relative my-4 rounded border-l-2 border-orange-300 bg-gray-900/50 p-4 text-gray-300 max-w-full"
             {...props}
         >
             <span className="absolute left-2 top-0 text-6xl opacity-25 -z-10">“</span>
