@@ -3,7 +3,7 @@ import { getBlogPosts} from "./getPosts";
 import { unstable_cache } from "next/cache";
 
 export const getFeed = unstable_cache(async function getFeed() {
-    const siteURL = "https://amn-sh.vercel.app";
+    const siteURL = "https://www.amn.sh";
     const feedOptions = {
         title: "amn.sh",
         language: "en",
