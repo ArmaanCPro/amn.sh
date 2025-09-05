@@ -3,7 +3,7 @@ import fs from "fs/promises";
 import path from "path";
 import { unstable_cache } from "next/cache";
 import * as runtime from "react/jsx-runtime";
-import { evaluate } from "@mdx-js/mdx"
+import { evaluate, compile } from "@mdx-js/mdx"
 import {fileURLToPath} from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -53,6 +53,8 @@ export const getBlogPosts = unstable_cache(async () => {
             const relevantContent = lines.slice(0, firstImport).join("\n");
             console.log(`Relevant content for ${blog}:`, relevantContent);
 
+            const bodyContent = lines.slice(firstImport).join("\n");
+
             try {
                 const { metadata }: { metadata?: PostMeta } = (await evaluate(
                     relevantContent,
@@ -67,7 +69,11 @@ export const getBlogPosts = unstable_cache(async () => {
                     return null;
                 }
 
-                return { ...metadata, path: "/blog/" + blog };
+                // turn MDX into HTML for RSS feeds
+                const compiled = await compile(bodyContent, { outputFormat: "program" });
+                const html = String(compiled);
+
+                return { ...metadata, path: "/blog/" + blog, contentHtml: html };
             } catch (evalError) {
                 console.error(`Error evaluating ${blog}:`, evalError);
                 return null;
