@@ -21,7 +21,7 @@ export const getFeed = unstable_cache(async function getFeed() {
         const posts = await getBlogPosts();
 
         posts.forEach((post) => {
-            const { title, path, description = "", date = "", contentHtml = "" } = post;
+            const { title, path, description = "", date = "", contentMDX = "", contentHtml = "" } = post;
 
             if (title == null || path == null) return;
 
@@ -32,7 +32,7 @@ export const getFeed = unstable_cache(async function getFeed() {
                 description,
                 date: new Date(date),
                 author: [feedOptions.author],
-                content: contentHtml, // full body for RSS
+                content: contentMDX, // full body for RSS
             });
         });
 

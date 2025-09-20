@@ -67,7 +67,7 @@ export const getBlogPosts = unstable_cache(async () => {
                 const compiled = await compile(bodyContent, { outputFormat: "program" });
                 const html = String(compiled);
 
-                return { ...metadata, path: "/blog/" + blog, contentHtml: html };
+                return { ...metadata, path: "/blog/" + blog, contentMDX: bodyContent, contentHtml: html };
             } catch (evalError) {
                 console.error(`Error evaluating ${blog}:`, evalError);
                 return null;
