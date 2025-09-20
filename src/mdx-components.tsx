@@ -201,7 +201,7 @@ export function Pre({
             <div className="relative w-full overflow-x-auto max-w-full">
                 <Code
                     lang={lang}
-                    theme="github-dark"
+                    theme="one-dark-pro"
                     lineNumbers={true}
                     className="text-sm"
                 >
