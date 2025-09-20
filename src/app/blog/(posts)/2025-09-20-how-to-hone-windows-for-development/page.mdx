@@ -1,0 +1,136 @@
+export const metadata = {
+    title: "How to Hone Windows for Development",
+    date: "2025-09-20",
+    author: "Armaan Chahal",
+    published: true,
+    tags: ["windows", "development", "performance", "tips", "swe", "linux"],
+    description: "How to make Windows a software development powerhouse",
+};
+
+import { Giscus } from "@/app/components/Giscus";
+import path from "path";
+export const __dirname = path.dirname(new URL(import.meta.url).pathname);
+
+## Why Even Use Windows?
+
+In a lot of professional software development, you'll be using Windows.
+Fields like Game Development and Graphics Programming are the most prominent examples, but many SWE companies or teams just use Windows.
+I too enjoy using **Linux**. I have Arch & Hyprland installed on my laptop, and Neovim is my preferred editor.
+
+However, my main workstation is a Windows 11 desktop computer I built myself. I know I'm talking extensively about myself, but I feel
+my own experience is fairly common among many of you. I do gaming on Windows, development on Windows, and most other tasks I do on Windows.
+
+### The Main Pain Points
+
+I hear a lot of people say "Just use WSL" especially for tools like Git, Node, etc. But, for our case, we won't be using WSL or anything other than native Windows 11.
+Yes, that includes MingW (a toolchain I used to use a lot).
+
+On the topic of Git, I don't use Git Bash or any other special git client.
+
+#### Git
+
+I've simply just installed Git from the website and use it from Windows Terminal.
+In Windows Terminal, I use _PowerShell_ (the new version).
+Git works perfectly fine for me. It really is that simple.
+Actually, I'd recommend using a package manager like **chocolatey** or **winget** to install Git.
+
+
+#### Package Managers
+
+I use both chocolatey and winget for package management. To be honest, winget is excellent. It has come a long way since I first checked it out.
+Both Winget and Chocolatey have a **lot** of packages. However, I prefer chocolatey for one specific reason:
+It doesn't automatically configure itself with programs you installed using other installers.
+Winget will pick up installed programs on your machine regardless of how you installed them. This is a huge disadvantage for me.
+I don't want or need Winget to update Epic Games Launcher or Steam whenever I run `winget upgrade`.
+Though, that _could_ be a benefit for you.
+
+There are also package managers like **scoop** which I've heard good things about. I've never used it, though, so I can't speak to its specifics.
+It seems that scoop can install programs without Admin privileges, which may be good for people on work computers.
+
+### C/C++ Development
+
+C/C++ development is often something people mention as being **terrible** on Windows.
+I'm happy to inform you that that isn't true.
+
+For any development workflow, make sure you install the latest version of Visual Studio.
+Not just for the IDE, but for all the tools it includes, like MSVC.
+You don't need to install CMake, Node, Python, etc. from it. I installed all of those separately.
+
+I use **CMake** for the vast majority of my C/C++ projects.
+Normally, I use CLion, but I'm going to cover just Visual Studio for now (as most jobs that require Windows require Visual Studio).
+
+Visual Studio _can_ work well with CMake. But, don't be afraid to use Visual Studio .sln files if your entire team is using Visual Studio.
+
+With CMake, you don't even have to use the `Visual Studio 17 2022` generator.
+You can use `Ninja` as your generator, and just use MSVC (cl.exe) as the compiler.
+Make sure you add cl.exe to your PATH.
+In fact, the PATH is such an important part of your development environment that I recommend you add a lot of your tools to your PATH. Also understand _what_ the PATH _is_.
+
+For compiling since C/C++ files, you can still use cl.exe. For some reason, the Visual Studio Code docs recommend using MingW for development.
+However, you can use cl.exe in your terminal for compiling single files.
+I usually do something like this:
+
+```Powershell
+cl /EHsc /std:c++latest main.cpp /Fe:main.exe
+```
+
+However, if you can, you can also use MingW and gcc/clang for compiling single files.
+
+### MingW vs MSVC
+
+To preface, if you're using MingW, use either the Clang64 or UCRT64 toolchains, not the MINGW64 toolchain.
+
+The reason I don't use MingW anymore is that the compilation speed is incredibly slow. On my machine, the performance list goes like this:
+
+(fastest) MSVC with Ninja -> MSVC with .sln -> MingW with Ninja -> MingW with MingW Makefiles (slowest).
+
+MSVC, even with .sln, is around 40-50% faster than MingW in my own game engine project (moon engine).
+Now, as a compiler, is MSVC better than gcc or clang?
+It's comparable, but I do prefer gcc. I don't really use clang.
+But MSVC is still **good**. It is not bad at all. My only slight annoyance is that it's errors and warnings are usually less strict than gcc/clang.
+So, when I use something like all warnings and warnings as errors, code that compiles with MSVC may fail with gcc/clang.
+
+### Vim on Windows???
+
+Firstly, I use Neovim on Linux. The only time I **ever** use Vim is when I'm SSH-ed on to a remote server that only has Vim installed.
+
+It's not feasible to use Neovim on Windows. Vim with plugins probably isn't reasonable either (haven't extensively tested though).
+Now, is it possible? Yes. But it doesn't work well. Many plugins are flat-out broken on Windows.
+Aside from the plugin issue, the Neovim workflow on Windows just isn't that good.
+Windows just isn't that good for terminal-based workflows. You can make it work, sure, but if you have _any_ Windows-only tooling,
+you're probably out of luck. For example, .sln files, just don't work with Neovim (no plugins I've found).
+
+However, as I mentioned earlier, I use CLion for C/C++ development.
+All Jetbrains IDEs have a plugin called `IdeaVim` which works very well. It uses .vimrc, not lua like Neovim, but its functionality is exceptional.
+Check out my [IdeaVim .vimrc](https://gist.github.com/ArmaanCPro/59d559ba1587a510ae59603e212ff16c).
+
+Even with Visual Studio, there are Vim emulator plugins like `VsVim` that work decently well.
+For VS Code, there are Vim and Neovim extensions, but I think the Vim extension works the best.
+
+For me, I do have a heavily customized [neovim config](https://github.com/ArmaanCPro/nvim-config).
+However, .vimrc based vim emulators work well. For me, them most important thing is just basic vim motions.
+
+### Other Programming Languages
+
+If you use package managers, chances are there is little you'll have to do aside from just `choco install <package>`.
+Even something like rustup is installable through the terminal.
+
+The most common complaint of things just not working on Windows or requiring extensive customization _just isn't true_ for 99% of things these days.
+Just remember to have Visual Studio installed. It fixes a lot of problems with prereqs not being installed, or `redists` not being installed.
+
+## Conclusion
+
+Don't fall down rabbit holes trying to make Windows just like Linux or some _perfect_ platform.
+Sure, you may have to find Windows-specific solutions, but they often work well.
+Nor does that prevent you from writing cross-platform software, or make you reliant on Windows.
+But remember that Windows is not perfect, but it is possible to do most things on it.
+
+A lot of niche Linux commands may not have direct equivalents on Windows, but you can probably install cli tools that achieve those results.
+i.e., fzf, fd, etc.
+Even if you can't, you can still use WSL. Of course, I tried to make everything in this article as Windows-only as possible, but sometimes you need those tools.
+
+Windows-specific tools usually work better than trying to force Linux tools into Windows, as shown with C/C++ development.
+
+I've been using both Windows and Linux for a long time. You can get very efficient with **both**.
+
+<Giscus className="mt-16 border-t border-gray-600/25 pt-8"/>
