@@ -56,7 +56,7 @@ export default function RootLayout({
                         <ThemeModeToggle />
                     </div>
                     {children}
-                    <footer className="text-muted font-sans mt-16 py-8 text-center">
+                    <footer className="opacity-30 font-sans mt-16 py-8 text-center">
                         All Rights Reserved.
                     </footer>
                 </ThemeProvider>

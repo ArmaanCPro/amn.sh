@@ -268,7 +268,9 @@ export function Em(props: React.HTMLAttributes<HTMLElement>) {
 export function InlineCode(props: React.HTMLAttributes<HTMLElement>) {
     return (
         <code
-            className="rounded bg-green-950/20 border border-green-700 px-1 py-0.5 font-mono text-green-500 text-lg"
+            className="rounded border px-1 py-0.5 font-mono text-[0.95em]
+                bg-slate-100 text-slate-800 border-slate-200
+                dark:bg-slate-800/60 dark:text-slate-100 dark:border-slate-700"
             {...props}
         />
     );
