@@ -1,0 +1,449 @@
+export const metadata = {
+    title: "Coroutines & Concurrent HTTP and a Templating Engine in C++ (Part 2)",
+    date: "2025-12-15",
+    author: "Armaan Chahal",
+    published: true,
+    tags: ["http", "web", "htmx", "boost-asio", "asio", "cpp", "c++", "multithreading", "concurrency", "template engine", "inja"],
+    description: "Part 2 of the series on HTTP in C++. Learn concurrency with coroutines and Boost.Asio and templating with Inja.",
+};
+
+import { Giscus } from "@/app/components/Giscus";
+import { TableOfContents } from "@/app/components/TableOfContents";
+import path from "path";
+export const __dirname = path.dirname(new URL(import.meta.url).pathname);
+
+<TableOfContents
+    from="h2"
+    to="h4"
+/>
+
+## Getting Started With Concurrency
+
+If you haven't yet, read [part 1](https://amn.sh/blog/2025-12-14-http-server-in-cpp) for more info on the fundamentals of raw HTTP in C++.
+
+Yes, half of Boost.Asio is concurrency; the other half is I/O (networking in particular).
+Therefore, you may assume that Asio would make concurrency easy.
+And you'd be right! With the power of Asio and C++ Coroutines, writing concurrent networked code is __relatively__ easy!
+
+We'll end with the templating engine, as that is quite short and a fun way to wrap up this series.
+
+## The Idea
+
+We're talking about coroutines here. Asio sorts of amplifies the power of coroutines but doesn't necessarily change the core philosophy.
+Traditionally, in a multithreading environment, you have multiple hardware threads that each execute work in true parallel.
+This number is limited by your CPU, usually from 4 to 24 threads on modern desktops (half as many cores, but hyperthreading!).
+On the OS level, the number is much greater. But those aren't truly parallel threads. The OS performs context switching between threads,
+essentially giving each thread a slice of time to execute. For example, if you have 1 thread that takes 1 second to execute,
+you could split that up into 1000 OS threads that each take 1 ms to execute. However, your CPU doesn't actually have 1000 hardware threads,
+so the OS gives each thread a slice of time to execute.
+
+Coroutines are slightly different. Forgetting about Boost.Asio for a moment, C++ coroutines have nothing to do with threads.
+They don't necessarily enable parallel work, but they do enable asynchronous and __concurrent__ work.
+Coroutines are a lightweight language construct in C++, not an OS or hardware level feature.
+
+A popular analogy for coroutines is a chef in a kitchen. When a chef prepares a pizza, he must prepare the dough and ingredients first,
+but then he puts it all into the oven. Once the oven goes, the chef waits for 10 minutes for the pizza to cook. Then, he takes it out and gives it to the waiter.
+This is a traditional, single-threaded approach. There is a blocking event in the middle, waiting for the pizza to cook.
+There is a way to optimize this even without threads. We limit ourselves to one chef, so that means only 1 thread.
+When the chef puts the pizza, he can simultaneously start working on the next pizza. This can enable him to do orders of magnitude more work than before.
+All without parallelism.
+
+This is the essence of coroutines. The keyword `co_await` allows you to suspend the coroutine until some asynchronous event occurs.
+Not only does it suspend the coroutine, it signals that we can start working on some other task until we receive the value from `co_await`.
+This is analogous to the chef working on the next pizza after putting the pizza in the oven (the chef co_awaits on the result from the oven).
+
+The other coroutine keyword is `co_yield`, which we won't need here. It is similar to `co_return`, except you can resume a `co_yield` later.
+Imagine you have a for-loop, each iteration yields a value, but you can resume the for-loop if you wish after receiving a value.
+`co_yield` is used commonly in generators, which we won't need to make. There is the aforementioned `co_return`, which
+returns a value from a coroutine.
+
+Specific to Boost.Asio, there is `co_spawn`, which spawns a new coroutine (techinically, it schedules a coroutine on an executor).
+You may be wondering why we can't do this through regular C++.
+C++'s coroutines are just a language feature with syntax and compiler hooks. The way to "spawn" a coroutine is to just call the function,
+but without a schedular, nothing drives or resumes it.
+However, there is no higher-level orchestration. What if the coroutine starts in a suspended state?
+What about scheduling coroutines? What if we want to wait for multiple coroutines to finish? What if we want to cancel a coroutine?
+What about thread safety?
+These are all things that Boost.Asio provides.
+Asio is the driver with `co_spawn` and `io_context` that orchestrates the coroutines. `io_context` is the main event loop. It has all the state and controls everything about the coroutines.
+
+So, you may be wondering why we are doing asynchronous programming with Coroutines rather than parallel programming with threads.
+Asynchronous is far more efficient for I/O bound work, which a network server is bound to.
+In general, when you have 1 large task that can be broken down into smaller subtasks, use threads (CPU-heavy tasks).
+If you have various different small tasks that aren't particularly connected, especially involving lots of I/O,
+or you're bound by memory: use asynchronous programming.
+
+## Getting into the Code
+
+We'll be building on the same code from [part 1](https://amn.sh/blog/2025-12-14-http-server-in-cpp).
+
+We'll start by making the tcp_server asynchronous.
+
+src/tcp_server.cpp
+
+```cpp
+// existing code
+#include <coroutine>
+
+// existing code
+
+void tcp_server::run()
+{
+    // The normal accept loop, but now as a coroutine
+    // We explicitly use m_IoContext here; alternatively, we could provide a specific executor
+    boost::asio::co_spawn(m_IoContext,
+        [this]() -> boost::asio::awaitable<void> {
+            for (;;) {
+                // the actual accepting of sockets
+                tcp::socket socket(m_IoContext);
+
+                // suspends this coroutine until a client connects and returns control to m_IoContext
+                co_await m_Acceptor.async_accept(socket, boost::asio::use_awaitable);
+
+                // launches a new coroutine for each connection
+                // ownership of the socket must be transferred to the coroutine, otherwise the lifetime of the socket would be undefined
+                boost::asio::co_spawn(m_IoContext, parse(std::move(socket)), boost::asio::detached);
+            }
+        }, boost::asio::detached); // detached allows us to fire-and-forget, with no result or exception being captured
+
+        // this starts processing the coroutines
+        // blocks the calling thread and runs until no more work exists
+        m_IoContext.run();
+}
+// existing code
+```
+
+A question you may have is what is `boost::asio::use_awaitable`. Well, awaitables essentially allow you to replace callbacks with coroutines.
+Old Asio code looks like this:
+
+```cpp
+socket.async_read_some(buffer,
+    // a callback function to handle the data after it is done reading
+    [](boost::system::error_code ec, std::size_t n)
+    {
+        if (!ec)
+            handle_data(n);
+    });
+```
+
+But with coroutines, we essentially want an item to be returned that we can `co_await` on.
+So, modern Asio with awaitables looks like this:
+
+```cpp
+co_await socket.async_read_some(buffer, boost::asio::use_awaitable);
+```
+
+Note also that we don't have good error handling here. I'll leave that as an exercise for the reader. It really isn't that hard, just some try/catch blocks.
+Just know that when a detached coroutine throws, the program terminates.
+
+Now that `server.run()` is blocking and does an infinite loop, we no longer need the infinite loop in main.cpp.
+
+src/main.cpp
+```cpp
+// existing code
+
+try
+{
+    http::tcp_server server(port);
+
+    server.run();
+}
+// existing code
+```
+
+Now that we've established our main loop, it's time to get back to the tcp_server and make parsing asynchronous!
+
+### Asynchronous Parsing
+
+We just have to replace the blocking `read_some` with `async_read_some`. If you added CORS handling, you'll need to do a `co_return` from there.
+
+src/tcp_server.cpp
+```cpp
+// existing code
+
+// we need to change the return type to be an awaitable too
+boost::asio::awaitable<void> parse(tcp::socket socket)
+{
+    http::HttpRequest request;
+
+    boost::asio::streambuf request_buffer;
+
+    // we suspend this coroutine and let some other work happen until we finish reading the request
+    co_await boost::asio::async_read_until(socket, request_buffer,
+        "\r\n", boost::asio::use_awaitable);
+    // we're only parsing the request line
+    // if you wanted to parse headers, use "\r\n\r\n"
+
+    // existing code
+
+    // replace line: http::response_handler::dispatch(socket, request); with:
+
+    // we also suspend execution here until we finish dispatching, letting other work happen in the meantime
+    co_await http::response_handler::dispatch(socket, request);
+
+    // existing code
+}
+
+// existing code
+```
+
+And that's it! We've made parsing asynchronous. Now, we need to make dispatching asynchronous.
+
+## Asynchronous Dispatching
+
+First, we need to make the `dispatch` function return an awaitable.
+
+src/response_handler.h
+```cpp
+// existing code
+namespace response_handler
+{
+    boost::asio::awaitable<void> dispatch(tcp::socket socket, const http::HttpRequest& request);
+}
+// existing code
+```
+
+Next, let's modify the implementation.
+
+src/response_handler.cpp
+```cpp
+// existing code
+
+namespace response_handler
+{
+    boost::asio::awaitable<void> dispatch(tcp::socket socket, const http::HttpRequest& request)
+    {
+        if (!path_handlers.contains(request.path))
+        {
+            const auto response = HttpResponse{}
+                .set_version(request.version)
+                .set_status(404, "Not Found")
+                .set_body("Not Found");
+            co_await response.write(socket);
+
+            // first time we've seen co_return. It just allows us to return from a coroutine
+            // implicity returns void (same as coreturn void)
+            co_return;
+        }
+
+        auto response = co_await path_handlers.at(request.path)(socket, request);
+        co_await response.write(socket);
+        // we don't need to specify co_return here, it is implicit
+    }
+}
+```
+
+We escape execution at a few steps. Those are when writing to a socket and when executing the path handler function.
+We escape the coroutine when writing to a socket because writing to a socket is asynchronous itself (blocking normally),
+so we can just hand execution off to something else (io_context) until we're done.
+We also escape the coroutine when executing the path handler function because the path handler function is also asynchronous.
+Although path handling is not inherently asynchronous like writing to a socket, the path handler may have async code inside it.
+
+Now, we need to actually make the `HttpResposne.write()` and path handlers asynchronous.
+
+src/response_handler.cpp
+```cpp
+// existing code
+
+namespace
+{
+    struct HttpResponse
+    {
+    private:
+        // existing code
+    public:
+        // existing code (set_* functions)
+
+        boost::asio::awaitable<void> write(tcp::socket& socket) const
+        {
+            // existing code
+
+            // we suspend execution until we finish writing the response
+            co_await boost::asio::async_write(socket, boost::asio::buffer(message), boost::asio::use_awaitable);
+        }
+    };
+
+    using path_handler_fn = boost::asio::awaitable<HttpResponse> (*)(tcp::socket&, const http::HttpRequest&);
+    const std::unordered_map<std::string, path_handler_fn> path_handlers = {
+        {
+            "/", [](tcp::socket& socket, const http::HttpRequest&) -> boost::asio::awaitable<HttpResponse> {
+                if (request.method != "GET")
+                {
+                    const auto response = HttpResponse{}.set_version(request.version)
+                        .set_status(405, "Method Not Allowed")
+                        .set_body("Method Not Allowed");
+                    co_return response;
+                }
+
+                // I'll get back to stream files in a bit
+                // For now, imagine it as being able to use a file with the same API as a socket
+                // i.e., you can async_read and async_write to it like a socket
+                boost::asio::stream_file file(socket.get_executor());
+
+                boost::system::error_code ec;
+                file.open("test_client/client.html", boost::asio::stream_file::read_only, ec);
+
+                if (ec)
+                {
+                    const auto response = HttpResponse{}.set_version(request.version)
+                        .set_status(500, "Internal Server Error")
+                        .set_body("Failed to open client.html\n" + ec.message());
+                    co_return response;
+                }
+
+                const auto size = file.seek(0, boost::asio::stream_file::seek_end);
+                file.seek(0, boost::asio::stream_file::seek_set);
+
+                std::string buffer(size, '\0');
+                buffer.resize(size);
+
+                co_await boost::asio::async_read(file, boost::asio::buffer(buffer),
+                    boost::asio::use_awaitable);
+
+                const auto response = HttpResponse{}
+                    .set_version(request.version)
+                    .set_status(200, "OK")
+                    .set_body(buffer)
+                    .set_header("Content-Type", "text/html; charset=utf-8");
+
+                co_return response;
+            }
+        },
+        {
+            "/time", [](tcp::socket& socket, const http::HttpRequest&) -> boost::asio::awaitable<HttpResponse> {
+                if (request.method != "GET")
+                {
+                    const auto response = HttpResponse{}
+                        .set_version(request.version)
+                        .set_status(405, "Method Not Allowed")
+                        .set_body("Method Not Allowed");
+                    co_return response;
+                }
+
+                const auto time = std::chrono::system_clock::now();
+                const auto timeString = std::format("{:%Y-%m-%d %H:%M:%S}", time);
+
+                const auto response = HttpResponse{}
+                    .set_version(request.version)
+                    .set_status(200, "OK")
+                    .set_body(timeString);
+
+                co_return response;
+            }
+        }
+    }
+}
+// existing code
+```
+
+A few unique things you may notice. First, we are actually using `co_return` to return values. In this case, awaitables
+of type `HttpResponse` are returned from the path handlers.
+
+Second, we are using `boost::asio::stream_file` to read from a file. This is a modern feature of Boost.Asio that allows you to treat a file as a socket.
+This makes asynchronous File I/O a breeze. You may get issues with including it in the build, though.
+On Windows, you may need to add this macro to your build system compile definitions: `_WIN32_WINNT=0x0A00`.
+On Linux, you may need to link to `liburing`. I'll leave these as exercises for the reader.
+If you can't figure it out, look at [my build system](https://github.com/ArmaanCPro/aychTTP/blob/main/CMakeLists.txt) or post a comment at the bottom of this page.
+
+## Templating Engine
+
+Firstly, we'll be using [Inja](https://github.com/pantor/inja) for templating.
+We'll be using nlohmann's JSON library for providing data to Inja.
+You'll see what that means shortly.
+Also, make sure you link your executable to Inja and nlohmann's JSON library in your build system.
+
+With Inja, templating is really quite easy.
+If you don't know what templating is, it's essentially a way to programmatically generate HTML.
+Say you had an array in C++ that you wanted to transform into a list in HTML.
+You could write a loop in C++ to generate the HTML, but that would be error-prone and inefficient.
+Instead, we can use a templating engine to generate the HTML for us. The engine has knowledge of C++ structures.
+Currently, we're building HTML ourselves. For example, in the `/time` path handler, we pass a raw string.
+What if we wanted to add HTML elements like bold text or italicized text to that response?
+We could manually write the HTML using C++ strings or have the templating engine do it for us.
+
+Inja takes in data as JSON. Say we have the following template:
+`{{ time }}`. Time could be anything, really. Inja recognizes through the `{{ }}` syntax that it should be replaced with some data.
+We can pass data to Inja using JSON. We have a JSON key `time` that has a value of the current time.
+Then, we can render to a `std::string` using Inja via `inja::render()`.
+We could give the template to Inja as a raw string, or we could pass it a file path.
+For now, we'll just pass it a raw string.
+
+Navigate to the `/time` path handler function:
+
+src/response_handler.cpp
+```cpp
+// existing code
+{
+    "/time", [](tcp::socket& socket, const http::HttpRequest&) -> boost::asio::awaitable<HttpResponse> {
+        // existing code
+
+        // replace the manual timeString stuff with this:
+        nlohmann::json vm;
+        vm["time"] = std::format("{:%Y-%m-%d %H:%M:%S}",
+            std::chrono::system_clock::now());
+
+        // we don't need an env for our use-case
+        // but it is good to have one in case you want to render a file or something else
+        Inja::Environment env;
+        const auto html = env.render("{{ time }} with ❤️ from C++", vm);
+
+        const auto response = HttpResponse{}
+            .set_version(request.version)
+            .set_status(200, "OK")
+            .set_body(html);
+        // this is still technically plain-text, not html, so we don't need to change the "Content-Type" header
+        // if we had html elements, we would need to change it to "text/html; charset=utf-8"
+
+        co_return response;
+    }
+}
+```
+
+The JSON is called vm because it is the view-model. It's the data that Inja will use to render the template.
+It gives Inja the view into our data. It is also, at the same time, the model of the data itself.
+It controls the shape and type of data.
+
+At this point, we have a fully asynchronous server with a templating engine!
+
+This is a fully featured C++ HTTP server.
+Truly, the vast majority of features left for implementation are CORS handling (which is quite easy)
+and architectural changes to make the server more scalable (not just a jump table of lambdas for handlers).
+These are all QoL, the main foundations of the server are done and dusted.
+
+## Conclusion
+
+We've made a fully asynchronous HTTP server in C++.
+What does that mean?
+It means it can scale to potentially millions of concurrent connections.
+We don't even have any multithreading in play. Sure, we could use a thread pool to drive the io_context, but we're running it on a single thread.
+Multithreading _may_ introduce performance gains, but not as much as asynchronous programming.
+Look into how you can use thread pools with Boost.Asio and io_context if you want to learn more.
+
+The templating engine gives us a way to easily serve HTML from the server without having to manually form HTML
+from C++ strings. Moreover, we've given the server some structure in how it manages data: JSON.
+We don't necessarily need to use JSON as the model of our data, but having it as the view is certainly useful.
+We could represent our data however we want.
+
+Now, don't confuse our asynchronous server with asynchronous APIs.
+Asynchronous APIs technically don't need to even execute on an asynchronous backend.
+Basically, all an asynchronous API does is respond to the client saying that it will give back the true value at some point in the future.
+Then, later, it sends another request with the final value.
+This can be done through webhooks, emails, having the client poll the server on an interval, etc.
+You could hobble together an asynchronous API using our current server, or even the one from part 1.
+
+Our server isn't a production-grade HTTP server.
+But you can certainly take it there using this as a solid foundation.
+
+Some things for further improvement:
+- The jump table is intentionally simple; real servers use structured routers, middleware chains, and prefix matching
+- The server doesn't handle errors very well.
+- No logging
+- No tests
+- Authentication? (not inherently HTTP, but useful in a web backend)
+- Parsing the headers and body of an HttpRequest
+    - Handling partial reads and malformed requests
+- Backpressure and capping concurrent work (not just fire-and-forget)
+- Optimizing hot code paths
+
+
+<Giscus className="mt-16 border-t border-gray-600/25 pt-8"/>
