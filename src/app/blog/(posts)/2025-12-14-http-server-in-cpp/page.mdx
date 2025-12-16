@@ -17,6 +17,22 @@ export const __dirname = path.dirname(new URL(import.meta.url).pathname);
     to="h4"
 />
 
+## Intro
+
+Welcome. We're gonna talk about how web servers actually work, in C++, without magic.
+If you want to skip the conceptual lore dump, go right ahead to the [code](#from-humble-beginnings) sections.
+On the topic of theory vs practice, here's a phenomenal quite by Donald Knuth:
+>If you find that you're spending almost all your time on theory, start turning some attention to practical things; it will improve your theories.
+>If you find that you're spending almost all your time on practice, start turning some attention to theoretical things; it will improve your practice.
+>
+>---Donald Knuth
+
+This article walks through building a minimal HTTP/1.1 server directly on top of TCP using Boost.Asio.
+The not production readiness, but understanding how modern asynchronous C++ maps to real web protocols.
+You don't need to be super comfortable with C++ or networking,
+but it would certainly help. If you're trying to transition to C++ from a higher-level language, props.
+
+
 ## HTTP in C++... why?
 
 The first question anyone with sense would pose, upon hearing of someone writing an HTTP server in C++, is why?
