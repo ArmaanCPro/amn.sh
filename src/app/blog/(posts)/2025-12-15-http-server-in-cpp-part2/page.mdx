@@ -246,7 +246,7 @@ so we can just hand execution off to something else (io_context) until we're don
 We also escape the coroutine when executing the path handler function because the path handler function is also asynchronous.
 Although path handling is not inherently asynchronous like writing to a socket, the path handler may have async code inside it.
 
-Now, we need to actually make the `HttpResposne.write()` and path handlers asynchronous.
+Now, we need to actually make the `HttpResponse.write()` and path handlers asynchronous.
 
 src/response_handler.cpp
 ```cpp
