@@ -599,4 +599,17 @@ The templating engine is really quite straightforward.
 Also, the Asio in Boost.Asio stands for "Async IO," so concurrency should be native to Asio.
 We'll find out soon.
 
+
+## Notes On the Build System
+
+Personally, I chose to use CMake for my build system.
+CMake is the de-facto standard for C++. Once you get familiar with CMake, it's not too bad.
+Build systems are the type of things you write once and copy paste into every new project you make (until it doesn't work).
+Regardless, to install Boost.Asio, I used `vcpkg`, a C++ package manager made by Microsoft.
+In my experience, it's been the most reliable and easy to use C++ package manager.
+
+I would write out the build scripts here, but it's easier if you just look at the [repo](https://github.com/ArmaanCPro/aychTTP/blob/main/CMakeLists.txt).
+Look at the CMakeLists.txt file, the CMakePresets.json file, and the vcpkg.json file.
+
+
 <Giscus className="mt-16 border-t border-gray-600/25 pt-8"/>
