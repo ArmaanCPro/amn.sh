@@ -4,10 +4,8 @@ import path from "path";
 import { unstable_cache } from "next/cache";
 import * as runtime from "react/jsx-runtime";
 import { evaluate, compile } from "@mdx-js/mdx"
-import {fileURLToPath} from "url";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const blogDir = path.join(__dirname, "(posts)");
+const blogDir = path.join(process.cwd(), "src", "app", "blog", "(posts)")
 
 export type PostMeta = {
     title?: string;
