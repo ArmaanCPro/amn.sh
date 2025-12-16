@@ -8,8 +8,14 @@ export const metadata = {
 };
 
 import { Giscus } from "@/app/components/Giscus";
+import { TableOfContents } from "@/app/components/TableOfContents";
 import path from "path";
 export const __dirname = path.dirname(new URL(import.meta.url).pathname);
+
+<TableOfContents
+    from="h2"
+    to="h4"
+/>
 
 ## HTTP in C++... why?
 
@@ -18,12 +24,12 @@ Perhaps with a few added exclamation points.
 
 Now, there are a few reasons one would get started with such a feat. Primarily: learning!
 For learning purposes, there is no better way to understand HTTP and how the web truly works than by writing an HTTP server in a language where the web isn't a first-class citizen.
-(Or at least, where the web wasn't mean't to be first-class...)
+(Or at least, where the web wasn't meant to be first-class...)
 
-Moreover, there truly do come times where a very high-performance backend is necessary. It doesn't necessarily have to be for a website, though that is a commen use-case.
-If you want performance, it just isn't feasible with Javascript or other high-level languages. For such an endevour, I would honestly recommend using a language that has more support for HTTP in it's standard library.
+Moreover, there truly do come times when a very high-performance backend is necessary. It doesn't necessarily have to be for a website, though that is a common use-case.
+If you want performance, it just isn't feasible with JavaScript or other high-level languages. For such an endeavour, I would honestly recommend using a language that has more support for HTTP in it's standard library.
 For example, Go and Rust. Now, C++ is my bread and butter, but even the people on the standards committee can agree that networking is one place where C++ is lacking.
-If you still want to use C++ for a production-grade application, checkout libraries like [Drogon](https://github.com/drogonframework/drogon) or [Boost.Beast](https://github.com/boostorg/beast).
+If you still want to use C++ for a production-grade application, check out libraries like [Drogon](https://github.com/drogonframework/drogon) or [Boost.Beast](https://github.com/boostorg/beast).
 They provide higher-level abstractions for HTTP (so you don't actually have to write an HTTP server from TCP sockets).
 
 ## Where Does that Leave Us?
@@ -38,9 +44,9 @@ We're going to use Boost.Asio. From now on, I'm going to refer to Boost.Asio as 
 Asio is distributed under the generous __Boost Software License__, which is quite similar to other popular licenses like the MIT License, Apache, BSD, etc. Check it out [here](https://www.boost.org/doc/user-guide/bsl.html).
 
 Why did I choose Boost.Asio over OS-specific options? Well, it has a nicer API and is cross-platform.
-And why over libuv? For no particular reason other than I was already familiar with Asio and wasn't with libuv. Both are great libraries and I would suggest you look at libuv for a wider perspective afterwards.
+And why over libuv? For no particular reason other than I was already familiar with Asio and wasn't with libuv. Both are great libraries, and I would suggest you look at libuv for a wider perspective afterward.
 
-What other dependencies will we need? In the future, we're going to need _Inja_ and a json library. That's for a templating engine, like Jinja2, Go/Templ, etc.
+What other dependencies will we need? In the future, we're going to need _Inja_ and a JSON library. That's for a templating engine, like Jinja2, Go/Templ, etc.
 
 ### The Theory
 
@@ -48,18 +54,18 @@ We all love whiteboard sessions, right? No... just me? Whiteboarding is both goo
 
 Firstly, let's define our client. Who will actually be sending the requests? We could write our own client in C++ or a higher-level language, but if you read the title, you already know that our client will be [HTMX](https://htmx.org/).
 HTMX is a great library; if you're unfamiliar with it, it is essentially raw HTML, but you can attach HTTP requests to any element, not just `<a>` and `<form>`.
-If we were to write an HTTP client in C++, that would be super boring. All we would see would be console logs like "REQUEST SENT!" and "RESPONSE SENT!" and "RESPONSE RECEIEVED!".
+If we were to write an HTTP client in C++, that would be super boring. All we would see would be console logs like "REQUEST SENT!" and "RESPONSE SENT!" and "RESPONSE RECEIEVED!"
 
 Instead, we can have a nice frontend in our browser! At the end of the day, the browser is doing the heavy lifting for the client-side application. But that means all we will have to write is some HTMX code.
 
 #### HTTP
 
 Now, let's define HTTP itself. An HTTP request is a plain-text and consists of a few different parts. That means that we don't need any fancy serialization or deserialization logic. To be clear, we're going to write a server for HTTP/1.1, not HTTP/2.
-That just makes life a little easier for us, but there's not loss of learning. In order to understand HTTP/2, you need to understand HTTP/1.1.
+That just makes life a little easier for us, but there's not loss of learning. To understand HTTP/2, you need to first understand HTTP/1.1.
 HTTP is just a protocol, like TCP and UDP. It stands for Hypertext Transfer Protocol, so you can probably infer it has something to do with HTML.
 That intuition is correct, as HTTP is most commonly used in websites (though it's not limited to that).
 
-HTTP Requests have a few main components:
+HTTP Requests have a few main parts:
 1. Method
 2. Path
 3. Version
@@ -94,8 +100,8 @@ Content-Type: text/html
 
 <!doctype html>… (here come the 29769 bytes of the requested web page)
 ```
-In this example, the client requests a GET at the path "/", which is basically asking the server for the index.html, the root html file that the browser should display. The server responds with pure HTML in the body.
-The headers just provide more information about the request/response, which is _sometimes_ necessary, like Content-Type and Content-Length if we have a body.
+In this scenario, the user asks for a GET request to the path "/", essentially requesting the index.html file, which is the primary HTML document the browser is meant to show. The server then sends back raw HTML within the response body.
+The headers simply contain additional details regarding the request or response; these are sometimes needed, such as Content-Type and Content-Length, especially when a body is present.
 
 Yes, I got both of these from the phenomenal [HTTP docs by mozilla](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Overview). Definitely give them a read for more in-depth information about the HTTP protocol.
 
@@ -105,7 +111,7 @@ HTTP isn't magic, and if you still have some questions, they will certainly get 
 
 So, Boost.Asio has no clue about HTTP. All it knows about is TCP (or UDP, but we HTTP requests need to be reliable, hence we use TCP). Boost.Asio will handle all the low-level details about TCP, like the 3-way handshake, and TCP-specific data.
 Boost.Asio exposes to us a TCP socket, from which we can read data (i.e., on the server we read the request) and write data (we write back to the client with our HTTP Response).
-This dynamic enables us to worry solely about the HTTP data itself, and not about the low-level TCP connections that actually underpin HTTP.
+This dynamic enables us to worry solely about the HTTP data itself and not about the low-level TCP connections that actually underpin HTTP.
 
 If you want to learn more about TCP and fundamental networking in general, I recommend the book [TCP/IP Illustrated](https://www.amazon.com/TCP-Illustrated-Protocols-Addison-Wesley-Professional/dp/0321336313?crid=5GD1XQGNTN95&dib=eyJ2IjoiMSJ9.vT1aaq_MECo7C_Rc8QXTO2ViERVDXTXEw7blI3INbKdonqpoca7yvF_1uh1F8E3IRIi7P9mZ6cQb64np-YNatX4Hnukao1LLsedp7Rpi5dhEhNLh8V17RP-jJwQKqzHQyI-aZFpliQIo8vKK3f0YDOL1Ld5qIeTr8NHtBeT-K7_uC3wUdDBXo0wMIOrH00HuXaSwD8MZkrgkCToUeCdPJ5yDGJvSCnvCMlfXA26LD5I.eAA72G7gOb1ZT_hOOF2Oc5U1fi2KDeiGpNboLTOqPYQ&dib_tag=se&keywords=tcp%2Fip+illustrated&qid=1765769052&s=books&sprefix=tcp%2Fip+illustrate%2Cstripbooks%2C151&sr=1-1).
 You only really need Volume 1. Whether you get the first or second edition doesn't matter.
@@ -115,7 +121,7 @@ You only really need Volume 1. Whether you get the first or second edition doesn
 We'll write our HTMX client now. Just so that we can get started. If you want an idea about the project structure, here's a link to the [final project](https://github.com/ArmaanCPro/aychTTP/tree/5cd9ba7e4c2d037f03f3588880674b90944a3df3).
 That is an old commit, but it's probably as far as we'll get to in this post. Check the main branch's HEAD for some more features.
 
-Let's start with some html.
+Let's start with some HTML.
 
 test_client/client.html
 ```html
@@ -134,7 +140,7 @@ test_client/client.html
 </body>
 </html>
 ```
-Neat, right? No? Oh... you wondering where the HTMX is?
+Neat, right? No? Oh... you're wondering where the HTMX is?
 Wait, wait, I see it!
 
 test_client/client.html
@@ -150,14 +156,14 @@ test_client/client.html
 ...
 ```
 
-There we go. Now, we inject HTMX via a CDN, and we hook up the button to some htmx events. We're basically saying that when the button is clicked, sent a GET request to the path '/time' and swap the innerHTML of the element with id time.
-That element is our div. The innerHTML of the div is just the text inside of it.
+There we go. Now, we inject HTMX via a CDN, and we hook up the button to some HTML events. We're basically saying that when the button is clicked, sent a GET request to the path '/time' and swap the innerHTML of the element with id time.
+That element is our div. The innerHTML of the div is just the text inside it.
 
-Very simple, I know, but enough to get us started!
+Straightforward, I know, but enough to get us started!
 
 #### Onto C++
 
-Now, make sure you're C++ build system is linking to Boost.Asio and is set to C++23 (you may be able to get by with older versions, but I haven't tested them). Again, if you want more info on the build system, see the [Github repo I linked earlier](https://github.com/ArmaanCPro/aychTTP/tree/5cd9ba7e4c2d037f03f3588880674b90944a3df3).
+Now, make sure your C++ build system is linking to Boost.Asio and is set to C++23 (you may be able to get by with older versions, but I haven't tested them). Again, if you want more info on the build system, see the [GitHub repo I linked earlier](https://github.com/ArmaanCPro/aychTTP/tree/5cd9ba7e4c2d037f03f3588880674b90944a3df3).
 
 Let's just start in the main function to see how we can actually use Asio.
 
@@ -274,7 +280,7 @@ namespace http
 }
 ```
 
-So far, pretty self explanatory. The tcp_server will handle layers 1 and 2, of connection and parsing.
+So far, pretty self-explanatory. The tcp_server will handle layers 1 and 2, of connection and parsing.
 
 Let's start with the run method, which we will define in a new file:
 
@@ -311,7 +317,7 @@ Nothing extraordinary yet, we've just reorganized the code we had before. But tr
 
 #### Layer 2: Parsing
 
-Parsing HTTP, for our case so far, is suprisingly easy. We don't need to worry about headers or a body for our purposes today.
+Parsing HTTP, for our case so far, is surprisingly easy. We don't need to worry about headers or a body for our purposes today.
 All we care about is the stuff defined in HttpRequest in `tcp_server.h`.
 
 In case you're wondering what `parse(std::move(socket));` was doing earlier, here we are.
@@ -358,13 +364,13 @@ namespace http
 ```
 
 Now, all the code comments should explain what's going on.
-However, you may be interested that "\r\n" is our deliniator for reading the socket. That's because in HTTP, all new lines are seperated by "\r\n", like CRLF line-endings on Windows.
+However, you may be interested that "\r\n" is our delimiter for reading the socket. That's because in HTTP, all new lines are separated by "\r\n" like CRLF line-endings on Windows.
 The method, path, and version are all on one line.
-Then, each header has it's own line.
+Then, each header has its own line.
 Then, before the body, there is an extra blank line.
 Then, there is the body.
 
-So, if we wanted to read all the headers as well, we could just change the deliniator in read_until to be "\r\n\r\n", as the last header ends with "\r\n", then another "\r\n" after the last header for an extra blank line.
+So, if we wanted to read all the headers as well, we could just change the delimiter in read_until to be "\r\n\r\n", as the last header ends with "\r\n", then another "\r\n" after the last header for an extra blank line.
 All of this is guaranteed by the HTTP/1.1 spec.
 
 #### Layer 3: Router/Dispatcher
@@ -451,7 +457,7 @@ src/response_handler.cpp
 #include <string_view>
 #include <chrono>
 #include <format>
-#include <fstream>
+#include <article>
 
 using namespace std::literals;
 
@@ -585,12 +591,12 @@ Wow, that was a doozy. But with that, we've added handler functions. We also add
 You've made the transition from a rookie understanding of HTTP to a solid, mid-level to senior-level understanding of HTTP.
 We started from raw Boost.Asio TCP sockets, and made it to serving an HTMX frontend.
 
-If you want to see your website, just run the server and open `http://localhost:3000` in your browser.
+If you want to see your website, run the server and open `http://localhost:3000` in your browser.
 
 Now, there are a few things left to implement. Those being concurrency and a templating engine.
 We also may have to handle CORS in the future. If you are encountering issues with CORS, see my up-to-date GitHub repo.
 The templating engine is really quite straightforward.
-Also, the Asio in Boost.Asio stands for "Async IO", so concurrency should be native to Asio.
+Also, the Asio in Boost.Asio stands for "Async IO," so concurrency should be native to Asio.
 We'll find out soon.
 
 <Giscus className="mt-16 border-t border-gray-600/25 pt-8"/>
