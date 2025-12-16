@@ -60,8 +60,9 @@ Instead, we can have a nice frontend in our browser! At the end of the day, the 
 
 #### HTTP
 
-Now, let's define HTTP itself. An HTTP request is a plain-text and consists of a few different parts. That means that we don't need any fancy serialization or deserialization logic. To be clear, we're going to write a server for HTTP/1.1, not HTTP/2.
-That just makes life a little easier for us, but there's not loss of learning. To understand HTTP/2, you need to first understand HTTP/1.1.
+Now, let's define HTTP itself. An HTTP request is a text-based and consists of a few different parts. Well, technically bodies are binary and headers _may_ encode data.
+That means that we don't need any fancy serialization or deserialization logic. To be clear, we're going to write a server for HTTP/1.1, not HTTP/2.
+That just makes life a little easier for us. To understand HTTP/2, you need to first understand HTTP/1.1.
 HTTP is just a protocol, like TCP and UDP. It stands for Hypertext Transfer Protocol, so you can probably infer it has something to do with HTML.
 That intuition is correct, as HTTP is most commonly used in websites (though it's not limited to that).
 
@@ -109,7 +110,8 @@ HTTP isn't magic, and if you still have some questions, they will certainly get 
 
 #### TCP
 
-So, Boost.Asio has no clue about HTTP. All it knows about is TCP (or UDP, but we HTTP requests need to be reliable, hence we use TCP). Boost.Asio will handle all the low-level details about TCP, like the 3-way handshake, and TCP-specific data.
+So, Boost.Asio has no clue about HTTP. All it knows about is TCP (or UDP, but we HTTP requests need to be reliable, hence we use TCP).
+Boost.Asio will handle all the low-level details about TCP. It delegates even lower-level TCP details like the 3-way handshake to the OS.
 Boost.Asio exposes to us a TCP socket, from which we can read data (i.e., on the server we read the request) and write data (we write back to the client with our HTTP Response).
 This dynamic enables us to worry solely about the HTTP data itself and not about the low-level TCP connections that actually underpin HTTP.
 
@@ -187,6 +189,8 @@ int main() {
             tcp::socket socket{io_context}; // the socket itself
             acceptor.accept(socket); // blocking function call that waits for a connection
 
+            // this is intentionally blocking, we'll get to async code in part 2
+
             const std::string message = "hi from server";
             boost::system::error_code ignored_error{}; // we ignore the error of the write
             boost::asio::write(socket, boost::asio::buffer(message), ignored_error); // this writes a buffer to the socket, in this case just a string
@@ -237,6 +241,7 @@ src/main.cpp
         http::tcp_server server(port); // we will make this class soon
         for (;;) {
             server.run(); // can you imagine what server.run() will do?
+            // again, intentionally blocking, we'll get to concurrency in part 2
         }
     }
 // rest of the code...
@@ -370,8 +375,10 @@ Then, each header has its own line.
 Then, before the body, there is an extra blank line.
 Then, there is the body.
 
-So, if we wanted to read all the headers as well, we could just change the delimiter in read_until to be "\r\n\r\n", as the last header ends with "\r\n", then another "\r\n" after the last header for an extra blank line.
+So, if we wanted to read all the headers as well, we could just change the delimiter in read_until to be "\r\n\r\n",
+as the last header ends with "\r\n", then another "\r\n" after the last header for an extra blank line.
 All of this is guaranteed by the HTTP/1.1 spec.
+This is sufficient for our simplified parser, but production servers must handle partial reaads and malformed requests.
 
 #### Layer 3: Router/Dispatcher
 
@@ -413,7 +420,7 @@ src/response_handler.cpp
 #include "response_handler.h"
 #include "tcp_server.h"
 
-namespace response_handler
+namespace http::response_handler
 {
     void handle(tcp::socket& socket, const HttpRequest& request)
     {
@@ -457,7 +464,7 @@ src/response_handler.cpp
 #include <string_view>
 #include <chrono>
 #include <format>
-#include <article>
+#include <fstream>
 
 using namespace std::literals;
 
@@ -502,6 +509,8 @@ namespace http
             HttpResponse& set_body(std::string new_body)
             {
                 body = std::move(new_body);
+                // Content-Lenght expects bytes
+                // length == bytes for UTF-8
                 headers["Content-Length"] = std::to_string(body.length());
                 return *this;
             }
@@ -522,7 +531,7 @@ namespace http
 
 
         // typedef for a function pointer, in our case we'll use lambdas. You could use any sort of function pointer, though
-        using path_handler_fn = HttpResponse (*)(tcp::socket& socket, const HttpResponse&);
+        using path_handler_fn = HttpResponse (*)(tcp::socket& socket, const HttpRequest&);
 
         const std::unordered_map<std::string_view, path_handler_fn> path_handlers = {
 
@@ -598,6 +607,8 @@ We also may have to handle CORS in the future. If you are encountering issues wi
 The templating engine is really quite straightforward.
 Also, the Asio in Boost.Asio stands for "Async IO," so concurrency should be native to Asio.
 We'll find out soon.
+
+Read [part 2](https://www.amn.sh/blog/2025-12-15-http-server-in-cpp-part2)
 
 
 ## Notes On the Build System
