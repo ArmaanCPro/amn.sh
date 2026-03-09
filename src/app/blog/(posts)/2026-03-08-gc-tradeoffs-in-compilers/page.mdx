@@ -15,13 +15,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 
 Automatic memory management is one of the defining features of modern programming languages. By delegating memory reclamation to the runtime system, languages such as Java, Go, and C# eliminate entire classes of memory safety errors common in manual allocation environments like C and C++. However, this convenience comes with significant design tradeoffs. Garbage collectors influence runtime performance, memory layout, compiler implementation, and system latency characteristics.
 
-This paper surveys several fundamental garbage collection strategies—reference counting, mark–sweep, mark–compact, copying collectors, generational garbage collection, and concurrent collection techniques. We analyze their algorithmic behavior and examine the practical tradeoffs faced by language and runtime designers. In particular, we focus on how these collectors interact with compilers, including root identification, write barriers, heap layout, and pause-time considerations.
+This paper surveys several fundamental garbage collection strategies—reference counting, mark–sweep, mark–compact, copying collectors, generational garbage collection, and concurrent collection techniques. We analyze their algorithmic behavior and examine practical tradeoffs faced by language and runtime designers. In particular, we focus on how these collectors interact with compilers, including root identification, write barriers, heap layout, and pause-time considerations.
 
 ---
 
 ## 1. Introduction
 
-Memory management is a central problem in programming language implementation. In systems programming environments such as C and C++, memory allocation is explicitly controlled through mechanisms such as `malloc`/`free` or `new`/`delete`. While this model offers maximal control and predictable performance, it also introduces the possibility of severe bugs including use-after-free, double-free, and memory leaks.
+Memory management is a central problem in programming language implementation. In systems programming environments such as C and C++, memory allocation is explicitly controlled through mechanisms such as `malloc`/`free` or `new`/`delete`. While this model offers maximal control and predictable performance, it also introduces severe bugs including use-after-free, double-free, and memory leaks.
 
 Garbage collection (GC) offers an alternative model: memory is automatically reclaimed when objects are no longer reachable from the program's roots. While conceptually simple, implementing efficient garbage collectors is a deeply complex systems problem. The collector must:
 
@@ -32,17 +32,11 @@ Garbage collection (GC) offers an alternative model: memory is automatically rec
 
 Different GC algorithms approach these challenges in different ways, each introducing tradeoffs in latency, throughput, memory overhead, and implementation complexity.
 
-This paper examines the most widely used GC strategies and discusses how they affect both **runtime systems** and **compiler design**.
-
 ---
 
 ## 2. Reference Counting
 
-Reference counting is one of the simplest garbage collection techniques. Each object maintains a counter representing the number of references pointing to it. When the reference count drops to zero, the object can be immediately reclaimed.
-
-### Algorithm
-
-Whenever a pointer is assigned, the runtime increments the target object's reference count and decrements the previous object's count.
+Reference counting maintains a counter per object representing the number of references to it. When the count reaches zero, the object is immediately reclaimed.
 
 ```pseudo
 function assign(ptr, new_object):
@@ -59,60 +53,39 @@ function assign(ptr, new_object):
             free(old_object)
 ```
 
-### Advantages
+**Advantages:**
 
-Reference counting offers several desirable properties:
+* Immediate reclamation
+* Low pause times
+* Conceptually simple
 
-* **Immediate reclamation** of unused objects
-* **Low pause times** since no global heap scan is required
-* Straightforward conceptual model
+**Limitations:**
 
-These characteristics make reference counting attractive in interactive environments.
+* Cyclic references leak memory
+* Overhead on each pointer assignment
 
-### Limitations
-
-However, reference counting suffers from a fundamental weakness: **cyclic references**.
-
-Consider two objects referencing each other but otherwise unreachable from program roots. Their reference counts never reach zero, causing a memory leak.
-
-Additionally, reference counting introduces **constant runtime overhead** on pointer assignments, which can significantly affect performance in pointer-heavy programs.
-
-### Real-World Usage
-
-Reference counting is widely used in systems such as:
-
-* Python's primary GC mechanism
-* Swift's ARC (Automatic Reference Counting)
-
-However, these systems typically supplement reference counting with **cycle detection algorithms**.
+**Usage:** Python, Swift ARC
 
 ---
 
 ## 3. Mark–Sweep Collection
 
-Mark–sweep collection is one of the earliest tracing garbage collection algorithms. Instead of tracking reference counts, the collector periodically traverses the object graph to identify reachable objects.
+Mark–sweep uses a two-phase approach:
 
-The algorithm proceeds in two phases:
-
-1. **Mark phase** — traverse reachable objects
-2. **Sweep phase** — reclaim unmarked memory
-
-### Algorithm
+1. **Mark** reachable objects starting from roots
+2. **Sweep** unmarked objects for reclamation
 
 ```pseudo
 function mark(root):
     if root.marked:
         return
-
     root.marked = true
-
     for child in root.references:
         mark(child)
 
 function mark_sweep(heap, roots):
     for root in roots:
         mark(root)
-
     for object in heap:
         if object.marked:
             object.marked = false
@@ -120,150 +93,65 @@ function mark_sweep(heap, roots):
             free(object)
 ```
 
-### Advantages
-
-Mark–sweep collectors eliminate the cyclic reference problem present in reference counting. They also avoid per-assignment overhead.
-
-### Limitations
-
-The primary drawback is **heap fragmentation**. Since objects remain in place after collection, the heap becomes increasingly fragmented over time.
-
-Another drawback is **stop-the-world pauses**, where program execution must halt while the collector scans memory.
+**Advantages:** Handles cyclic references, avoids per-assignment overhead.
+**Limitations:** Stop-the-world pauses, heap fragmentation.
 
 ---
 
 ## 4. Mark–Compact Collection
 
-Mark–compact collectors address the fragmentation problem of mark–sweep collectors by relocating live objects after marking.
+Mark–compact reduces fragmentation by relocating live objects after marking.
 
-After identifying reachable objects, the collector **moves them into contiguous memory**, updating references accordingly.
+**Heap Visualization (ASCII)**
 
-### Algorithm Outline
+<pre>
+Heap before compaction:
+[ ObjA ][ ObjB ][ Free ][ ObjC ][ ObjD ][ Free ][ Free ]
 
-```pseudo
-mark_live_objects()
+Heap after compaction:
+[ ObjA ][ ObjB ][ ObjC ][ ObjD ][ Free ][ Free ][ Free ]
+</pre>
 
-new_address = heap_start
-
-for object in heap:
-    if object.marked:
-        object.forwarding = new_address
-        new_address += object.size
-
-for object in heap:
-    if object.marked:
-        move(object, object.forwarding)
-```
-
-### Advantages
-
-Mark–compact collectors provide:
-
-* **Reduced fragmentation**
-* Improved **memory locality**
-
-Better locality can significantly improve cache performance.
-
-### Limitations
-
-However, object relocation introduces additional complexity:
-
-* Pointer updates must occur throughout the heap
-* Stack references must be rewritten
-* Compiler cooperation is required
-
-Because of these requirements, mark–compact collectors typically rely on **precise root information provided by the compiler**.
+**Advantages:** Reduced fragmentation, improved cache locality
+**Limitations:** Complex pointer updates, compiler cooperation required
 
 ---
 
 ## 5. Copying Collectors
 
-Copying collectors divide the heap into two equal regions:
+Copying collectors divide the heap into **from-space** and **to-space**, copying live objects to compact memory.
 
-* **From-space**
-* **To-space**
+**Heap Visualization (ASCII)**
 
-Allocation occurs in from-space. During garbage collection, live objects are copied into to-space, compacting them automatically. Once copying completes, the spaces are swapped.
+<pre>
+From-space: [ Obj1 ][ Obj2 ][ Obj3 ][ Obj4 ]
+To-space:   [      ][      ][      ][      ]
 
-This approach was popularized by Cheney's algorithm.
+After copying live objects:
+From-space: [      ][      ][      ][      ]
+To-space:   [ Obj1 ][ Obj2 ][ Obj3 ][ Obj4 ]
+</pre>
 
-### Cheney's Algorithm
-
-```pseudo
-function cheney_gc():
-    swap(from_space, to_space)
-
-    scan = to_space.start
-    free = to_space.start
-
-    for root in roots:
-        root = copy(root)
-
-    while scan < free:
-        for ref in scan.references:
-            ref = copy(ref)
-        scan += scan.size
-```
-
-### Advantages
-
-Copying collectors offer several strong properties:
-
-* **Automatic compaction**
-* **Fast allocation** (simple bump pointer)
-* **Improved cache locality**
-
-These characteristics make copying collectors particularly attractive for short-lived objects.
-
-### Limitations
-
-The most significant drawback is **space overhead**, since half the heap must remain unused during copying.
-
-This cost can be substantial in memory-constrained environments.
+**Advantages:** Automatic compaction, fast allocation, better cache locality
+**Limitations:** Space overhead (semi-space), requires careful memory layout
 
 ---
 
 ## 6. Generational Garbage Collection
 
-Empirical observations about program behavior led to the **generational hypothesis**:
+Generational collectors exploit the **empirical observation that most objects die young**. Memory is divided into **young and old generations**.
 
-> Most objects die young.
+**Heap Visualization (ASCII)**
 
-Generational collectors exploit this by dividing objects into multiple generations:
+<pre>
+Young Generation: [ Eden ][ Survivor1 ][ Survivor2 ]
+Old Generation:   [ ObjA ][ ObjB ][ ObjC ]
 
-* **Young generation**
-* **Old generation**
+Minor GC collects mostly Eden, promotes surviving objects to Survivor or Old Generation.
+Major GC collects Old Generation, usually less frequently.
+</pre>
 
-Young objects are collected frequently using fast copying collectors, while older objects are collected less often.
-
-### Generational Layout
-
-```
-+-------------------+
-| Young Generation  |
-|  Eden             |
-|  Survivor Spaces  |
-+-------------------+
-| Old Generation    |
-+-------------------+
-```
-
-### Benefits
-
-Generational collectors significantly reduce GC overhead because:
-
-* Most garbage is collected quickly
-* Old objects are rarely scanned
-
-This approach dramatically improves overall throughput.
-
-### Write Barriers
-
-However, generational collectors introduce an important complexity: **tracking references from old objects to young objects**.
-
-This requires **write barriers**, small pieces of code inserted by the compiler whenever pointers are modified.
-
-Example write barrier:
+**Write Barrier Example:**
 
 ```pseudo
 function write_barrier(obj, field, value):
@@ -272,78 +160,73 @@ function write_barrier(obj, field, value):
         remember_set.add(obj)
 ```
 
-The compiler or JIT must cooperate with the runtime to ensure these barriers execute correctly.
+---
+
+## 7. Concurrent and Incremental GC
+
+Concurrent and incremental collectors reduce pause times by performing GC work alongside the program.
+
+* **Incremental:** divides work into small steps interleaved with execution
+* **Concurrent:** collector runs on separate threads; must handle mutating program state
+
+**Techniques:** Tri-color marking, snapshot-at-the-beginning, write barriers
 
 ---
 
-## 7. Concurrent and Incremental Garbage Collection
+## 8. Complexity Analysis
 
-Traditional collectors often require **stop-the-world pauses**, where application execution halts while the collector runs. For interactive systems and large heaps, these pauses can become unacceptable.
-
-Concurrent and incremental collectors attempt to reduce pause times by performing GC work alongside program execution.
-
-### Incremental Collection
-
-Incremental collectors divide collection work into small steps interleaved with program execution.
-
-This reduces pause times but increases overall runtime complexity.
-
-### Concurrent Collection
-
-Concurrent collectors run simultaneously with the application on separate threads.
-
-However, concurrency introduces new challenges:
-
-* The program may modify objects while they are being scanned
-* The collector must maintain heap consistency
-
-To address this, collectors use techniques such as:
-
-* **Tri-color marking**
-* **Snapshot-at-the-beginning algorithms**
-* **Read/write barriers**
-
-These techniques significantly increase implementation complexity.
-
----
-
-## 8. Implications for Compiler and Runtime Design
-
-Garbage collection is not purely a runtime problem. Efficient collectors require significant **compiler cooperation**.
-
-### Root Identification
-
-The collector must identify **roots**, including:
-
-* Stack variables
-* CPU registers
-* Global variables
-
-Precise collectors require the compiler to generate **stack maps** describing pointer locations at GC-safe points.
-
-### Write Barriers
-
-Generational and concurrent collectors require the compiler to emit **write barriers** on pointer updates. These barriers must be carefully optimized to avoid excessive overhead.
-
-### Safe Points
-
-Programs must periodically reach **GC safe points**, where execution can pause and the collector can safely inspect program state.
-
-The compiler typically inserts safe points at:
-
-* Loop back edges
-* Function calls
-* Allocation sites
-
-### Escape Analysis
-
-Modern compilers may also perform **escape analysis** to determine whether objects can remain on the stack rather than the heap. This optimization can significantly reduce GC pressure.
+<Table>
+  <TableHeader>
+    <TableRow>
+      <TableHead>Strategy</TableHead>
+      <TableHead>Allocation Complexity</TableHead>
+      <TableHead>Collection Complexity</TableHead>
+      <TableHead>Space Overhead</TableHead>
+    </TableRow>
+  </TableHeader>
+  <TableBody>
+    <TableRow>
+      <TableCell>Reference Counting</TableCell>
+      <TableCell>O(1)</TableCell>
+      <TableCell>O(1)</TableCell>
+      <TableCell>Low</TableCell>
+    </TableRow>
+    <TableRow>
+      <TableCell>Mark–Sweep</TableCell>
+      <TableCell>O(1)</TableCell>
+      <TableCell>O(n)</TableCell>
+      <TableCell>Moderate</TableCell>
+    </TableRow>
+    <TableRow>
+      <TableCell>Mark–Compact</TableCell>
+      <TableCell>O(1)</TableCell>
+      <TableCell>O(n)</TableCell>
+      <TableCell>Moderate</TableCell>
+    </TableRow>
+    <TableRow>
+      <TableCell>Copying</TableCell>
+      <TableCell>O(1)</TableCell>
+      <TableCell>O(n)</TableCell>
+      <TableCell>High</TableCell>
+    </TableRow>
+    <TableRow>
+      <TableCell>Generational</TableCell>
+      <TableCell>O(1)</TableCell>
+      <TableCell>O(n) minor, O(n) major</TableCell>
+      <TableCell>Moderate</TableCell>
+    </TableRow>
+    <TableRow>
+      <TableCell>Concurrent</TableCell>
+      <TableCell>O(1)</TableCell>
+      <TableCell>O(n) concurrent</TableCell>
+      <TableCell>Moderate</TableCell>
+    </TableRow>
+  </TableBody>
+</Table>
 
 ---
 
 ## 9. Comparative Tradeoffs
-
-Different garbage collectors prioritize different performance characteristics.
 
 <Table>
   <TableHeader>
@@ -401,19 +284,9 @@ Different garbage collectors prioritize different performance characteristics.
   </TableBody>
 </Table>
 
-Modern language runtimes typically combine multiple strategies to balance these tradeoffs.
-
-For example:
-
-* **Java HotSpot** combines generational and concurrent collectors
-* **Go** uses concurrent tracing GC
-* **.NET** uses generational mark–compact collection
-
 ---
 
-### 9.1 Experimental Benchmark Insights
-
-The following table illustrates typical performance characteristics of different garbage collection strategies. Values are estimated from online benchmarks and practical experience with compiler/runtime implementations. These results highlight tradeoffs between pause time, throughput, and memory overhead.
+## 9.1 Experimental Benchmark Insights
 
 <Table>
   <TableHeader>
@@ -464,29 +337,54 @@ The following table illustrates typical performance characteristics of different
   </TableBody>
 </Table>
 
-#### Insights for Compiler and Runtime Designers
+### Insights for Compiler and Runtime Designers
 
-1. **Allocation patterns matter** — Short-lived objects benefit most from generational or copying collectors. Languages or engines that create many transient objects can optimize for minor collections to improve throughput.
+1. **Allocation patterns matter** — Short-lived objects benefit most from generational or copying collectors.
+2. **Pause time vs throughput tradeoff** — Interactive applications favor low-latency collectors like concurrent or generational GC.
+3. **Heap layout and memory locality** — Copying and generational collectors improve cache performance; compiler layout optimizations help.
+4. **Compiler cooperation is crucial** — Write barriers, safe points, and root maps reduce GC overhead.
+5. **Experimentation is valuable** — Small toy benchmarks help identify bottlenecks in allocation and collection.
 
-2. **Pause time vs throughput tradeoff** — Interactive applications (games, GUIs) favor low-latency collectors like concurrent or generational GC. Batch-processing workloads may tolerate higher pause times from mark–compact or mark–sweep collectors.
+---
 
-3. **Heap layout and memory locality** — Copying and generational collectors improve cache performance by compacting live objects. Compilers can assist by organizing hot vs cold data in memory.
+## 9.2 Real-world GC Comparisons
 
-4. **Compiler cooperation is crucial** — Write barriers, safe points, and precise root maps reduce GC overhead. Early integration of compiler/runtime design decisions is recommended.
-
-5. **Experimentation is valuable** — Implementing small-scale GC benchmarks, even with toy workloads, helps identify bottlenecks in allocation and collection strategies.
+<Table>
+  <TableHeader>
+    <TableRow>
+      <TableHead>Runtime</TableHead>
+      <TableHead>Collector Type</TableHead>
+      <TableHead>Pause Focus</TableHead>
+      <TableHead>Throughput Focus</TableHead>
+    </TableRow>
+  </TableHeader>
+  <TableBody>
+    <TableRow>
+      <TableCell>JVM HotSpot</TableCell>
+      <TableCell>G1 / ZGC</TableCell>
+      <TableCell>Low</TableCell>
+      <TableCell>Medium</TableCell>
+    </TableRow>
+    <TableRow>
+      <TableCell>Go</TableCell>
+      <TableCell>Concurrent Mark-Sweep</TableCell>
+      <TableCell>Very Low</TableCell>
+      <TableCell>Good</TableCell>
+    </TableRow>
+    <TableRow>
+      <TableCell>.NET CLR</TableCell>
+      <TableCell>Generational Mark-Compact</TableCell>
+      <TableCell>Medium</TableCell>
+      <TableCell>High</TableCell>
+    </TableRow>
+  </TableBody>
+</Table>
 
 ---
 
 ## 10. Conclusion
 
-Garbage collection remains one of the most challenging components of modern language runtimes. Different GC strategies present tradeoffs across latency, throughput, memory usage, and implementation complexity.
-
-Simple approaches such as reference counting provide predictable reclamation but struggle with cyclic structures. Tracing collectors such as mark–sweep eliminate these issues but introduce pause times and fragmentation. More advanced collectors—generational, concurrent, and incremental—attempt to balance these tradeoffs but require increasingly sophisticated runtime and compiler cooperation.
-
-Ultimately, no single garbage collection algorithm is optimal for all workloads. Runtime designers must carefully select or combine strategies depending on the language's goals, target workloads, and performance requirements.
-
-As managed languages continue to dominate large-scale software development, improvements in garbage collection algorithms and compiler integration remain an active and important area of systems research.
+Garbage collection strategies present a rich landscape of tradeoffs in latency, throughput, memory usage, and compiler/runtime complexity. By understanding algorithmic behavior and practical implications, language designers can make informed decisions aligned with application goals. Independent experiments and benchmarks, even at a toy scale, provide valuable insights into GC behavior and can guide compiler-level optimizations.
 
 ---
 
