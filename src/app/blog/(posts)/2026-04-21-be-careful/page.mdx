@@ -13,7 +13,7 @@ export const __dirname = path.dirname(new URL(import.meta.url).pathname);
 # Be Careful!
 
 Just encountered the most mind-numbing bug. The kind where once you realize the fix you learn something for the rest of your programming career.
-And I don't mean in the sense of becoming wiser at programming, but being more careful. The situation: I wanted to extend my renderer to support
+And I don't mean in the sense of becoming wiser at programming, but being more careful. The situation: I wanted to extend my [Vulkan renderer](https://github.com/ArmaanCPro/graphics_labs) to support
 different material pass types, such as `Unlit` and `Additive`, whereas I previously forced Additive for all transparent surfaces.
 So I just added new pipelines and new enum values to enable Additive, and it was basically a duplicate of the old transparent pipeline.
 
