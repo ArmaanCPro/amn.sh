@@ -1,0 +1,65 @@
+export const metadata = {
+    title: "Be Careful!",
+    date: "2026-04-21",
+    author: "Armaan Chahal",
+    published: true,
+    tags: ["vulkan", "c++", "debugging"],
+    description: "An anecdote on a particularly interesting debugging experience."
+};
+
+import path from "path";
+export const __dirname = path.dirname(new URL(import.meta.url).pathname);
+
+# Be Careful!
+
+Just encountered the most mind-numbing bug. The kind where once you realize the fix you learn something for the rest of your programming career.
+And I don't mean in the sense of becoming wiser at programming, but being more careful. The situation: I wanted to extend my renderer to support
+different material pass types, such as `Unlit` and `Additive`, whereas I previously forced Additive for all transparent surfaces.
+So I just added new pipelines and new enum values to enable Additive, and it was basically a duplicate of the old transparent pipeline.
+
+However, running the code, I found that the performance tanked to from 240 fps V-Sync to ~30 fps.
+I lost my mind profiling, re-reading the code, and everything. Because it was such a simple change, and even forcing the transparent pipeline again fixed the issue, but that's not what I wanted.
+So I kept re-reading and re-reading the code, stepping in the debugger, looking at Tracy, looking at RenderDoc, etc.
+Now, a key thing that I noticed at first, when I first started debugging, was when I opened RenderDoc. There were so many draw calls, especially for additive!
+Now, I didn't notice at first that they were specifically for additive, but I was intrigued. However, I put it off, thinking, okay, maybe there just are that many primitives in my scene (even though I knew they weren't).
+So I kept debugging after that. I tested different pipeline configurations, everything. I was sure there couldn't be any logic errors, because it was basically the same code as before!
+So I looked for typos, anything I could find. However, that resulted in a big load of nothing. Another odd phenomenon I noticed was that the additive surfaces seemed to be draw multiple times over each other,
+as if there were 5 meshes in one. Another 10 minutes go by, and at this point it has been over a day, with a few hours of active debugging.
+
+Yet, then something hit me, the FPS was steadily going down over time. That, combined with the fact that there was some sort of overdraw (not actual overdraw, that isn't really possible with Additive blending),
+led me to the key realization: something was not being cleared between frames. At first I thought it was something to do with my tonemapping,
+so I checked the render pass (dynamic rendering attachment) info of tonemapping, because, aside from ImGui, that was the only pass in my renderer that directly touched the swapchain.
+And I thought it was the swapchain that wasn't being cleared between frames. So I tried messing around with the Load/Clear operations, but that didn't fix things.
+But at this point, I know I'm close. So many things were pointing to my revelation being true. I analyzed every diff since last commit (not that much), and nothing.
+Yet then, it hit me. The `SceneManager`! Whenever I called `SceneManager::updateScene()`, I pushed surfaces to an internal DrawContext.
+I'd been clearing the old, opaque and transparent pipelines, but I hadn't modified it to handle the Unlit and Additive pipelines! So each frame, I was basically re-adding the Unlit/Additive surfaces without clearing the ones from the previous frame.
+
+I didn't even consider that the `SceneManager` could possibly be the culprit.
+I guess this teaches you to be very careful of the movement of your data in your program. Be very aware of this, and try to write code that requires the smallest "blast radius" so that you can easily change code and spot problems.
+Most of all, sometimes you just got to grind out debugging code. And because I know people will think of this: no, not any LLM I tried (Claude 4.6 & GPT-5) could solve this.
+
+
+### AI...?
+
+On the topic of LLM generated code, there is a particular value that has always existed in writing code yourself. That is that any engineering problem requires a certain understanding of the problem to solve.
+The more knowledge you have of your solution, the easier you can solve problems and the easier you can build upon it. Whether that be feature-wise, performance-wise, or craft-wise (code quality, maintainability, etc),
+it requires a certain vantage point. That vantage point doesn't exist with code written by people other than yourself. And it is even worse with LLMs, which tend to generate code that is difficult to comprehend.
+So yes, writing code by hand is incredibly meritorious and logically sensible. The unfortunate reality is that the more you use an LLM, the more you approach the potential of "it" rather than "you".
+It is not a "productivity multiplier" because of its very nature, at least for difficult engineering. The more you use it, the harder it is for you to comprehend both the problem and solution domain. 
+Again, that "vantage point" is not there. There is much more to speak on this topic, I even wrote a paper for school (English) on this.
+Regardless, there is a joy in having the computer do something. That is why vibe-coding is so popular. People for the first time, without the standard difficulty of programming, are feeling the effects of programming.
+Yet, they experience a fraction of what a programmer does, but perhaps the rest of their enjoyment is derived from a separate act than programming.
+Vibe-coding too is not a practical platform on which to learn how to code. It teaches fundamentally wrong practices, decreases cognitive capability in problem-solving, and creates an overreliance.
+I would only recommend vibe-coding if ALL software engineering is replaced by AI, which has yet to come.
+
+Great article on the topic if you'd like to read it [by Zeux.](https://zeux.io/2025/08/22/do-not-disrespect-the-fractal/)
+
+Vibe-coding gets you 30% of the way to a fully-fledged product, yet it creates a nearly insurmountable debt that drags you 300% in the opposite direction.
+Of course, this is from the perspective of a programmer, not a "builder" as some would call it.
+But to say programming has no level of creativity is a massive lie. All forms of engineering, especially one as free-flowing and fluid as programming, require creativity.
+Even broader, problem-solving in general requires creativity. Rote memorization will take you far, but to be great you must have passion (purpose).
+
+And that is solely on the "engineering" side of things. Plenty a programmer enjoys "building" too.
+
+Hype comes and goes. Convenience in life isn't something to chase after. Same goes for programming.
+Doing great things requires dedication and effort.
